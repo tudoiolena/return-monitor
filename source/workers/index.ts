@@ -1,12 +1,10 @@
-import {syncOrders} from './syncOrders';
+import { syncOrders } from "./syncOrders";
 
 setInterval(() => {
-  console.log('Worker is running');
+  console.log("Worker is running");
 
   syncOrders().catch(console.error);
-
 }, 1000 * 30);
-
 
 // const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 //

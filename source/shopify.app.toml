@@ -1,14 +1,14 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "bdbe89ca7aa014d20b8f64bd7e6d3226"
+client_id = "13419ce5335967303fb8b4b14de9b911"
 name = "return-monitor"
 handle = "return-monitor"
-application_url = "https://organisation-organic-sc-contribution.trycloudflare.com"
+application_url = "https://dallas-chi-invitation-subscription.trycloudflare.com"
 embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
-dev_store_url = "quickstart-5663cd0a.myshopify.com"
+dev_store_url = "app-tutorial-test.myshopify.com"
 include_config_on_deploy = true
 
 [access_scopes]
@@ -17,9 +17,9 @@ scopes = "read_customers,read_orders,read_returns"
 
 [auth]
 redirect_urls = [
-  "https://organisation-organic-sc-contribution.trycloudflare.com/auth/callback",
-  "https://organisation-organic-sc-contribution.trycloudflare.com/auth/shopify/callback",
-  "https://organisation-organic-sc-contribution.trycloudflare.com/api/auth/callback"
+  "https://dallas-chi-invitation-subscription.trycloudflare.com/auth/callback",
+  "https://dallas-chi-invitation-subscription.trycloudflare.com/auth/shopify/callback",
+  "https://dallas-chi-invitation-subscription.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

@@ -1,85 +1,87 @@
-import type {SyncOrdersTask} from '@prisma/client';
-import {$Enums} from '@prisma/client';
-import {unauthenticated} from '../../../app/shopify.server';
-
+import type { SyncOrdersTask } from "@prisma/client";
+import { $Enums } from "@prisma/client";
+import { unauthenticated } from "../../../app/shopify.server";
 
 export const createBulkTask = async (task: SyncOrdersTask) => {
+  console.log("hello createBulkTask");
   await prisma.syncOrdersTask.update({
     where: {
-      id: task.id
+      id: task.id,
     },
     data: {
       retryCount: {
-        increment: 1
+        increment: 1,
       },
       inProgress: true,
-      updatedAt: new Date()
-    }
+      updatedAt: new Date(),
+    },
   });
 
   const shop = await prisma.shop.findFirst({
     where: {
-      id: task.shopId
-    }
+      id: task.shopId,
+    },
   });
 
   if (!shop) {
     await prisma.syncOrdersTask.update({
       where: {
-        id: task.id
+        id: task.id,
       },
       data: {
         retryCount: {
-          increment: 1
+          increment: 1,
         },
         inProgress: false,
         updatedAt: new Date(),
-        error: 'Shop not found'
-      }
+        error: "Shop not found",
+      },
     });
     return;
   }
 
-  const {admin: {graphql}} = await unauthenticated.admin(shop.domain);
+  const {
+    admin: { graphql },
+  } = await unauthenticated.admin(shop.domain);
 
   const query = `
    {
-      orders(first: 999999999999999999) {
-        edges {
-          node {
-            id
-            customer {
-              id
-              email
-              firstName
-              lastName
-            }
-            totalPriceSet {
-              shopMoney {
-                amount
-                currencyCode
-              }
-            }
-            refunds {
-                id
-                totalRefundedSet {
-                 shopMoney {
+  orders(first: 250) {
+    edges {
+      node {
+        id
+        customer {
+          id
+          email
+          firstName
+          lastName
+        }
+        totalPriceSet {
+          shopMoney {
+            amount
+            currencyCode
+          }
+        }
+        refunds {
+          id
+          totalRefundedSet {
+            shopMoney {
               amount
               currencyCode
             }
           }
-              }
-            returns (first: 999999999999999999) {
-              edges{
-                node {
-                  id
-                }
-              }
+        }
+        returns(first: 250) {
+          edges {
+            node {
+              id
             }
           }
         }
       }
     }
+  }
+}
   `;
 
   const mutation = `
@@ -104,29 +106,29 @@ export const createBulkTask = async (task: SyncOrdersTask) => {
   if (result.ok) {
     await prisma.syncOrdersTask.update({
       where: {
-        id: task.id
+        id: task.id,
       },
       data: {
         stage: $Enums.SyncOrdersTaskStage.WAIT_FOR_FINISH,
         inProgress: false,
         updatedAt: new Date(),
-        data: body.data
-      }
+        data: JSON.stringify(body.data),
+      },
     });
     return;
   }
 
   await prisma.syncOrdersTask.update({
     where: {
-      id: task.id
+      id: task.id,
     },
     data: {
       retryCount: {
-        increment: 1
+        increment: 1,
       },
       inProgress: false,
       updatedAt: new Date(),
-      error: JSON.stringify(body)
-    }
+      error: JSON.stringify(body),
+    },
   });
 };

@@ -2,6 +2,7 @@ import { $Enums, type SyncOrdersTask } from "@prisma/client";
 import { unauthenticated } from "app/shopify.server";
 
 export const waitForFinish = async (task: SyncOrdersTask) => {
+  console.log("hello waitForFinish");
   await prisma.syncOrdersTask.update({
     where: {
       id: task.id,
@@ -43,7 +44,7 @@ export const waitForFinish = async (task: SyncOrdersTask) => {
   } = await unauthenticated.admin(shop.domain);
 
   const taskData = task.data ? JSON.parse(task.data as string) : {};
-  const dataId = taskData.id;
+  const dataId = taskData.bulkOperationRunQuery.bulkOperation.id;
 
   const query = `
     {
@@ -65,8 +66,9 @@ export const waitForFinish = async (task: SyncOrdersTask) => {
   const result = await graphql(query);
 
   const body = await result.json();
+  const operationStatus = body.data.node.status;
 
-  if (result.ok) {
+  if (operationStatus === "COMPLETED") {
     await prisma.syncOrdersTask.update({
       where: {
         id: task.id,
@@ -75,7 +77,7 @@ export const waitForFinish = async (task: SyncOrdersTask) => {
         stage: $Enums.SyncOrdersTaskStage.DOWNLOAD_RESULT,
         inProgress: false,
         updatedAt: new Date(),
-        data: body.data,
+        data: JSON.stringify(body.data.node),
       },
     });
     return;

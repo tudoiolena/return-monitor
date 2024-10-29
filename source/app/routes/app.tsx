@@ -1,23 +1,23 @@
-import type {HeadersFunction, LoaderFunctionArgs} from '@remix-run/node';
-import {json} from '@remix-run/node';
-import {Link, Outlet, useLoaderData, useRouteError} from '@remix-run/react';
-import {boundary} from '@shopify/shopify-app-remix/server';
-import {AppProvider} from '@shopify/shopify-app-remix/react';
-import {NavMenu} from '@shopify/app-bridge-react';
-import polarisStyles from '@shopify/polaris/build/esm/styles.css?url';
+import type { HeadersFunction, LoaderFunctionArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
+import { Link, Outlet, useLoaderData, useRouteError } from "@remix-run/react";
+import { boundary } from "@shopify/shopify-app-remix/server";
+import { AppProvider } from "@shopify/shopify-app-remix/react";
+import { NavMenu } from "@shopify/app-bridge-react";
+import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 
-import {getAdminContext} from '../shopify.server';
+import { getAdminContext } from "../shopify.server";
 
-export const links = () => [{rel: 'stylesheet', href: polarisStyles}];
+export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 
-export const loader = async ({request}: LoaderFunctionArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   await getAdminContext(request);
 
-  return json({apiKey: process.env.SHOPIFY_API_KEY || ''});
+  return json({ apiKey: process.env.SHOPIFY_API_KEY || "" });
 };
 
 export default function App() {
-  const {apiKey} = useLoaderData<typeof loader>();
+  const { apiKey } = useLoaderData<typeof loader>();
 
   return (
     <AppProvider isEmbeddedApp apiKey={apiKey}>
@@ -26,8 +26,9 @@ export default function App() {
           Home
         </Link>
         <Link to="/app/additional">Additional page</Link>
+        <Link to="/app/start-import">Start Import</Link>
       </NavMenu>
-      <Outlet/>
+      <Outlet />
     </AppProvider>
   );
 }

@@ -60,6 +60,54 @@ model SyncOrdersTask {
   @@index([inProgress, updatedAt], name: "SyncOrdersTaskInProgressUpdatedAtIndex")
 }
 
+
+model Order {
+  id               Int       @id @default(autoincrement())
+  shopifyId        String?    @unique
+  totalCost        Decimal
+  currency         String
+  customer         Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  customerId       Int
+  refunds          Refund[]
+  returns          Return[]
+
+  @@index([shopifyId], name: "OrderShopIdIndex")
+}
+
+model Customer {
+  id               Int       @id @default(autoincrement())
+  shopifyId        String    @unique
+  firstName        String
+  lastName         String
+  email            String
+  orders           Order[]
+
+  @@index([shopifyId], name: "CustomerShopIdIndex")
+  @@index([email], name: "CustomerEmailIndex")
+}
+
+model Refund {
+  id               Int      @id @default(autoincrement())
+  shopifyId        String    @unique
+  orderId          Int
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  refundId         String
+  totalRefunded    Decimal
+  refundCurrency   String
+
+  @@index([shopifyId], name: "RefundShopIdIndex")
+}
+
+model Return {
+  id               Int      @id @default(autoincrement())
+  shopifyId        String    @unique
+  orderId          Int
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  returnId         String
+  @@index([shopifyId], name: "ReturnShopIdIndex")
+}
+
+
 enum SyncOrdersTaskStage {
   CREATE_BULK_TASK
   WAIT_FOR_FINISH
@@ -67,3 +115,4 @@ enum SyncOrdersTaskStage {
   PROCESS_RESULT
   FINISH
 }
+
