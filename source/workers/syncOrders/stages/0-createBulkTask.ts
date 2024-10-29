@@ -3,7 +3,6 @@ import { $Enums } from "@prisma/client";
 import { unauthenticated } from "../../../app/shopify.server";
 
 export const createBulkTask = async (task: SyncOrdersTask) => {
-  console.log("hello createBulkTask");
   await prisma.syncOrdersTask.update({
     where: {
       id: task.id,

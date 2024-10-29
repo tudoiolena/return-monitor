@@ -27,9 +27,7 @@ export const processResult = async (task: SyncOrdersTask) => {
   }
 
   try {
-    const filePath = task.data as string; // Assuming task.data is the file path
-    console.log("filePath", filePath);
-
+    const filePath = task.data as string;
     const fileStream = fs.createReadStream(filePath);
     const rl = readline.createInterface({
       input: fileStream,
@@ -63,109 +61,104 @@ export const processResult = async (task: SyncOrdersTask) => {
         retryCount: { increment: 1 },
         inProgress: false,
         updatedAt: new Date(),
-        error: e.message,
+        error: e instanceof Error ? e.message : "Unknown error",
       },
     });
   }
+};
 
-  async function handleOrder(data: any) {
-    const shopifyId = data.id;
-    const totalCost = parseFloat(data.totalPriceSet.shopMoney.amount);
-    const currency = data.totalPriceSet.shopMoney.currencyCode;
+async function handleOrder(data: any) {
+  const shopifyId = data.id;
+  const totalCost = parseFloat(data.totalPriceSet.shopMoney.amount);
+  const currency = data.totalPriceSet.shopMoney.currencyCode;
 
-    // Handle customer information
-    const customerData = data.customer;
-    const customer = await prisma.customer.upsert({
-      where: { shopifyId: customerData.id },
-      update: {
-        firstName: customerData.firstName ?? "Unknown",
-        lastName: customerData.lastName,
-        email: customerData.email,
-      },
-      create: {
-        shopifyId: customerData.id,
-        firstName: customerData.firstName ?? "Unknown",
-        lastName: customerData.lastName,
-        email: customerData.email,
-      },
+  const customerData = data.customer;
+  const customer = await prisma.customer.upsert({
+    where: { shopifyId: customerData.id },
+    update: {
+      firstName: customerData.firstName ?? "Unknown",
+      lastName: customerData.lastName,
+      email: customerData.email,
+    },
+    create: {
+      shopifyId: customerData.id,
+      firstName: customerData.firstName ?? "Unknown",
+      lastName: customerData.lastName,
+      email: customerData.email,
+    },
+  });
+
+  await prisma.order.upsert({
+    where: { shopifyId },
+    update: {
+      totalCost,
+      currency,
+      customerId: customer.id,
+    },
+    create: {
+      shopifyId,
+      totalCost,
+      currency,
+      customerId: customer.id,
+    },
+  });
+
+  for (const refund of data.refunds) {
+    await handleRefund({
+      ...refund,
+      __parentId: shopifyId,
     });
+  }
+}
 
-    // Upsert the order (create if not exists, update if exists)
-    await prisma.order.upsert({
+async function handleRefund(data: any) {
+  const shopifyId = data.id;
+  const totalRefunded = parseFloat(data.totalRefundedSet.shopMoney.amount);
+  const refundCurrency = data.totalRefundedSet.shopMoney.currencyCode;
+  const parentOrderShopifyId = data.__parentId;
+
+  const order = await prisma.order.findUnique({
+    where: { shopifyId: parentOrderShopifyId },
+  });
+
+  if (order) {
+    await prisma.refund.upsert({
       where: { shopifyId },
       update: {
-        totalCost,
-        currency,
-        customerId: customer.id,
+        totalRefunded,
+        refundCurrency,
+        orderId: order.id,
       },
       create: {
         shopifyId,
-        totalCost,
-        currency,
-        customerId: customer.id,
+        refundId: shopifyId,
+        totalRefunded,
+        refundCurrency,
+        orderId: order.id,
       },
     });
-
-    // Process refunds
-    for (const refund of data.refunds) {
-      await handleRefund({
-        ...refund,
-        __parentId: shopifyId,
-      });
-    }
   }
+}
 
-  async function handleRefund(data: any) {
-    const shopifyId = data.id;
-    const totalRefunded = parseFloat(data.totalRefundedSet.shopMoney.amount);
-    const refundCurrency = data.totalRefundedSet.shopMoney.currencyCode;
-    const parentOrderShopifyId = data.__parentId;
+async function handleReturn(data: any) {
+  const shopifyId = data.id;
+  const parentOrderShopifyId = data.__parentId;
 
-    const order = await prisma.order.findUnique({
-      where: { shopifyId: parentOrderShopifyId },
+  const order = await prisma.order.findUnique({
+    where: { shopifyId: parentOrderShopifyId },
+  });
+
+  if (order) {
+    await prisma.return.upsert({
+      where: { shopifyId },
+      update: {
+        orderId: order.id,
+      },
+      create: {
+        shopifyId,
+        returnId: shopifyId,
+        orderId: order.id,
+      },
     });
-
-    if (order) {
-      // Upsert the refund (create if not exists, update if exists)
-      await prisma.refund.upsert({
-        where: { shopifyId },
-        update: {
-          totalRefunded,
-          refundCurrency,
-          orderId: order.id,
-        },
-        create: {
-          shopifyId,
-          refundId: shopifyId,
-          totalRefunded,
-          refundCurrency,
-          orderId: order.id,
-        },
-      });
-    }
   }
-
-  async function handleReturn(data: any) {
-    const shopifyId = data.id;
-    const parentOrderShopifyId = data.__parentId;
-
-    const order = await prisma.order.findUnique({
-      where: { shopifyId: parentOrderShopifyId },
-    });
-
-    if (order) {
-      // Upsert the return (create if not exists, update if exists)
-      await prisma.return.upsert({
-        where: { shopifyId },
-        update: {
-          orderId: order.id,
-        },
-        create: {
-          shopifyId,
-          returnId: shopifyId,
-          orderId: order.id,
-        },
-      });
-    }
-  }
-};
+}

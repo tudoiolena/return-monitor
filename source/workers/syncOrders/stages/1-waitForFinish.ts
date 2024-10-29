@@ -2,7 +2,6 @@ import { $Enums, type SyncOrdersTask } from "@prisma/client";
 import { unauthenticated } from "app/shopify.server";
 
 export const waitForFinish = async (task: SyncOrdersTask) => {
-  console.log("hello waitForFinish");
   await prisma.syncOrdersTask.update({
     where: {
       id: task.id,

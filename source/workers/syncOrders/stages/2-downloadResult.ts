@@ -6,7 +6,6 @@ import * as path from "path";
 const DOWNLOADS_FOLDER = "downloads";
 
 export const downloadResult = async (task: SyncOrdersTask) => {
-  console.log("hello downloadResult");
   await prisma.syncOrdersTask.update({
     where: { id: task.id },
     data: {
@@ -64,7 +63,6 @@ export const downloadResult = async (task: SyncOrdersTask) => {
         data: filePath,
       },
     });
-    console.log(`${task.id}, File download completed successfully.`);
   });
 
   writer.on("error", async (error) => {
@@ -77,6 +75,5 @@ export const downloadResult = async (task: SyncOrdersTask) => {
         error: error.message,
       },
     });
-    console.error(`${task.id} Error saving the file:`, error);
   });
 };
