@@ -31,8 +31,9 @@ export default function ReportTable() {
   const { mode, setMode } = useSetIndexFiltersMode(IndexFiltersMode.Filtering);
   const [queryValue, setQueryValue] = useState<string>("");
 
+  const mappedOrders = orders.map((order) => ({ ...order, id: order.id }));
   const { selectedResources, allResourcesSelected, handleSelectionChange } =
-    useIndexResourceState(orders);
+    useIndexResourceState(mappedOrders);
 
   const [fullNameFilter, setFullNameFilter] = useState<string>("");
   const [emailFilter, setEmailFilter] = useState<string>("");
@@ -144,7 +145,7 @@ export default function ReportTable() {
     },
   ];
 
-  const filteredOrders = orders.filter((order: Order) => {
+  const filteredOrders = orders.filter((order) => {
     const matchesFullName =
       !fullNameFilter ||
       order.fullName.toLowerCase().includes(fullNameFilter.toLowerCase());
@@ -159,8 +160,9 @@ export default function ReportTable() {
     const [field, direction] = sortSelected[0].split(" ");
     const sortDirection = direction === "asc" ? 1 : -1;
 
-    const aValue = a[field] || 0;
-    const bValue = b[field] || 0;
+    const aValue = a[field as keyof Order] as number;
+    const bValue = b[field as keyof Order] as number;
+
     return sortDirection * (aValue - bValue);
   });
 
