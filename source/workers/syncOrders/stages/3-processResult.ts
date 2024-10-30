@@ -3,6 +3,7 @@ import { $Enums } from "@prisma/client";
 import * as fs from "fs";
 import readline from "readline";
 import { runTaskWrapper } from "../helper/handle-task-wrapper";
+import { Decimal } from "@prisma/client/runtime/library";
 
 export const processResult = async (task: SyncOrdersTask) => {
   const taskRunner = async (task: SyncOrdersTask, shop: Shop) => {
@@ -25,13 +26,21 @@ export const processResult = async (task: SyncOrdersTask) => {
       }
     }
 
-    await prisma.syncOrdersTask.update({
-      where: { id: task.id },
-      data: {
-        stage: $Enums.SyncOrdersTaskStage.FINISH,
-        inProgress: false,
-        updatedAt: new Date(),
-      },
+    fs.unlink(filePath, async (err) => {
+      if (err) {
+        console.error("Error deleting file:", err);
+      } else {
+        console.log("File successfully deleted.");
+      }
+
+      await prisma.syncOrdersTask.update({
+        where: { id: task.id },
+        data: {
+          stage: $Enums.SyncOrdersTaskStage.FINISH,
+          inProgress: false,
+          updatedAt: new Date(),
+        },
+      });
     });
   };
 
@@ -40,7 +49,8 @@ export const processResult = async (task: SyncOrdersTask) => {
 
 async function handleOrder(data: any) {
   const shopifyId = data.id;
-  const totalCost = parseFloat(data.totalPriceSet.shopMoney.amount);
+  const totalCost = new Decimal(data.totalPriceSet.shopMoney.amount);
+
   const currency = data.totalPriceSet.shopMoney.currencyCode;
 
   const customerData = data.customer;
@@ -62,7 +72,7 @@ async function handleOrder(data: any) {
   await prisma.order.upsert({
     where: { shopifyId },
     update: {
-      totalCost,
+      totalCost: 123,
       currency,
       customerId: customer.id,
     },
@@ -84,7 +94,7 @@ async function handleOrder(data: any) {
 
 async function handleRefund(data: any) {
   const shopifyId = data.id;
-  const totalRefunded = parseFloat(data.totalRefundedSet.shopMoney.amount);
+  const totalRefunded = new Decimal(data.totalRefundedSet.shopMoney.amount);
   const refundCurrency = data.totalRefundedSet.shopMoney.currencyCode;
   const parentOrderShopifyId = data.__parentId;
 

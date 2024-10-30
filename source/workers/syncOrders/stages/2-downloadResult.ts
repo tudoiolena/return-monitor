@@ -54,6 +54,5 @@ export const downloadResult = async (task: SyncOrdersTask) => {
     });
   };
 
-  // Use the wrapper to run the task
   await runTaskWrapper(task, taskRunner);
 };
