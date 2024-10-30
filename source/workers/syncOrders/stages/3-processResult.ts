@@ -1,32 +1,11 @@
-import { $Enums, type SyncOrdersTask } from "@prisma/client";
+import type { Shop, SyncOrdersTask } from "@prisma/client";
+import { $Enums } from "@prisma/client";
 import * as fs from "fs";
 import readline from "readline";
+import { runTaskWrapper } from "../helper/handle-task-wrapper";
 
 export const processResult = async (task: SyncOrdersTask) => {
-  await prisma.syncOrdersTask.update({
-    where: { id: task.id },
-    data: {
-      retryCount: { increment: 1 },
-      inProgress: true,
-      updatedAt: new Date(),
-    },
-  });
-
-  const shop = await prisma.shop.findFirst({ where: { id: task.shopId } });
-  if (!shop) {
-    await prisma.syncOrdersTask.update({
-      where: { id: task.id },
-      data: {
-        retryCount: { increment: 1 },
-        inProgress: false,
-        updatedAt: new Date(),
-        error: "Shop not found",
-      },
-    });
-    return;
-  }
-
-  try {
+  const taskRunner = async (task: SyncOrdersTask, shop: Shop) => {
     const filePath = task.data as string;
     const fileStream = fs.createReadStream(filePath);
     const rl = readline.createInterface({
@@ -54,17 +33,9 @@ export const processResult = async (task: SyncOrdersTask) => {
         updatedAt: new Date(),
       },
     });
-  } catch (e) {
-    await prisma.syncOrdersTask.update({
-      where: { id: task.id },
-      data: {
-        retryCount: { increment: 1 },
-        inProgress: false,
-        updatedAt: new Date(),
-        error: e instanceof Error ? e.message : "Unknown error",
-      },
-    });
-  }
+  };
+
+  await runTaskWrapper(task, taskRunner);
 };
 
 async function handleOrder(data: any) {
@@ -131,7 +102,6 @@ async function handleRefund(data: any) {
       },
       create: {
         shopifyId,
-        refundId: shopifyId,
         totalRefunded,
         refundCurrency,
         orderId: order.id,
@@ -156,7 +126,6 @@ async function handleReturn(data: any) {
       },
       create: {
         shopifyId,
-        returnId: shopifyId,
         orderId: order.id,
       },
     });

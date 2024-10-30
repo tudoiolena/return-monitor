@@ -1,8 +1,8 @@
-import type { SyncOrdersTask } from "@prisma/client";
+import type { Shop, SyncOrdersTask } from "@prisma/client";
 
 export async function runTaskWrapper(
   task: SyncOrdersTask,
-  taskRunner: (shop) => Promise<void>,
+  taskRunner: (task: SyncOrdersTask, shop: Shop) => Promise<void>,
 ) {
   await prisma.syncOrdersTask.update({
     where: { id: task.id },
@@ -28,7 +28,7 @@ export async function runTaskWrapper(
   }
 
   try {
-    await taskRunner(shop);
+    await taskRunner(task, shop);
   } catch (error) {
     await prisma.syncOrdersTask.update({
       where: { id: task.id },
