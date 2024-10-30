@@ -42,102 +42,106 @@ export const processResult = async (task: SyncOrdersTask) => {
         },
       });
     });
+
+    async function handleOrder(data: any) {
+      const shopifyId = data.id;
+      const totalCost = new Decimal(data.totalPriceSet.shopMoney.amount);
+
+      const currency = data.totalPriceSet.shopMoney.currencyCode;
+
+      const customerData = data.customer;
+      const customer = await prisma.customer.upsert({
+        where: { shopifyId: customerData.id },
+        update: {
+          firstName: customerData.firstName ?? "Unknown",
+          lastName: customerData.lastName,
+          email: customerData.email,
+        },
+        create: {
+          shopId: shop.id,
+          shopifyId: customerData.id,
+          firstName: customerData.firstName ?? "Unknown",
+          lastName: customerData.lastName,
+          email: customerData.email,
+        },
+      });
+
+      await prisma.order.upsert({
+        where: { shopifyId },
+        update: {
+          totalCost,
+          currency,
+          customerId: customer.id,
+        },
+        create: {
+          shopId: shop.id,
+          shopifyId,
+          totalCost,
+          currency,
+          customerId: customer.id,
+        },
+      });
+
+      for (const refund of data.refunds) {
+        await handleRefund({
+          ...refund,
+          __parentId: shopifyId,
+        });
+      }
+    }
+
+    async function handleRefund(data: any) {
+      const shopifyId = data.id;
+      const totalRefunded = new Decimal(data.totalRefundedSet.shopMoney.amount);
+      const refundCurrency = data.totalRefundedSet.shopMoney.currencyCode;
+      const parentOrderShopifyId = data.__parentId;
+
+      const order = await prisma.order.findUnique({
+        where: { shopifyId: parentOrderShopifyId },
+      });
+
+      if (order) {
+        await prisma.refund.upsert({
+          where: { shopifyId },
+          update: {
+            totalRefunded,
+            refundCurrency,
+            orderId: order.id,
+          },
+          create: {
+            shopId: shop.id,
+            shopifyId,
+            totalRefunded,
+            refundCurrency,
+            orderId: order.id,
+          },
+        });
+      }
+    }
+
+    async function handleReturn(data: any) {
+      const shopifyId = data.id;
+      const parentOrderShopifyId = data.__parentId;
+
+      const order = await prisma.order.findUnique({
+        where: { shopifyId: parentOrderShopifyId },
+      });
+
+      if (order) {
+        await prisma.return.upsert({
+          where: { shopifyId },
+          update: {
+            orderId: order.id,
+          },
+          create: {
+            shopId: shop.id,
+            shopifyId,
+            orderId: order.id,
+          },
+        });
+      }
+    }
   };
 
   await runTaskWrapper(task, taskRunner);
 };
-
-async function handleOrder(data: any) {
-  const shopifyId = data.id;
-  const totalCost = new Decimal(data.totalPriceSet.shopMoney.amount);
-
-  const currency = data.totalPriceSet.shopMoney.currencyCode;
-
-  const customerData = data.customer;
-  const customer = await prisma.customer.upsert({
-    where: { shopifyId: customerData.id },
-    update: {
-      firstName: customerData.firstName ?? "Unknown",
-      lastName: customerData.lastName,
-      email: customerData.email,
-    },
-    create: {
-      shopifyId: customerData.id,
-      firstName: customerData.firstName ?? "Unknown",
-      lastName: customerData.lastName,
-      email: customerData.email,
-    },
-  });
-
-  await prisma.order.upsert({
-    where: { shopifyId },
-    update: {
-      totalCost: 123,
-      currency,
-      customerId: customer.id,
-    },
-    create: {
-      shopifyId,
-      totalCost,
-      currency,
-      customerId: customer.id,
-    },
-  });
-
-  for (const refund of data.refunds) {
-    await handleRefund({
-      ...refund,
-      __parentId: shopifyId,
-    });
-  }
-}
-
-async function handleRefund(data: any) {
-  const shopifyId = data.id;
-  const totalRefunded = new Decimal(data.totalRefundedSet.shopMoney.amount);
-  const refundCurrency = data.totalRefundedSet.shopMoney.currencyCode;
-  const parentOrderShopifyId = data.__parentId;
-
-  const order = await prisma.order.findUnique({
-    where: { shopifyId: parentOrderShopifyId },
-  });
-
-  if (order) {
-    await prisma.refund.upsert({
-      where: { shopifyId },
-      update: {
-        totalRefunded,
-        refundCurrency,
-        orderId: order.id,
-      },
-      create: {
-        shopifyId,
-        totalRefunded,
-        refundCurrency,
-        orderId: order.id,
-      },
-    });
-  }
-}
-
-async function handleReturn(data: any) {
-  const shopifyId = data.id;
-  const parentOrderShopifyId = data.__parentId;
-
-  const order = await prisma.order.findUnique({
-    where: { shopifyId: parentOrderShopifyId },
-  });
-
-  if (order) {
-    await prisma.return.upsert({
-      where: { shopifyId },
-      update: {
-        orderId: order.id,
-      },
-      create: {
-        shopifyId,
-        orderId: order.id,
-      },
-    });
-  }
-}

@@ -3,7 +3,7 @@
 client_id = "13419ce5335967303fb8b4b14de9b911"
 name = "return-monitor"
 handle = "return-monitor-1"
-application_url = "https://carolina-iron-ride-requirement.trycloudflare.com"
+application_url = "https://micro-auctions-triumph-fall.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_customers,read_orders,read_returns"
 
 [auth]
 redirect_urls = [
-  "https://carolina-iron-ride-requirement.trycloudflare.com/auth/callback",
-  "https://carolina-iron-ride-requirement.trycloudflare.com/auth/shopify/callback",
-  "https://carolina-iron-ride-requirement.trycloudflare.com/api/auth/callback"
+  "https://micro-auctions-triumph-fall.trycloudflare.com/auth/callback",
+  "https://micro-auctions-triumph-fall.trycloudflare.com/auth/shopify/callback",
+  "https://micro-auctions-triumph-fall.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

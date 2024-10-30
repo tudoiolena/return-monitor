@@ -38,6 +38,10 @@ model Shop {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   syncOrdersTask SyncOrdersTask[]
+  order          Order[]
+  customer       Customer[]
+  refund         Refund[]
+  return         Return[]
 }
 
 model SyncOrdersTask {
@@ -63,13 +67,15 @@ model SyncOrdersTask {
 
 model Order {
   id               Int       @id @default(autoincrement())
-  shopifyId        String?    @unique
-  totalCost        Decimal
+  shopifyId        String?   @unique
+  totalCost        Decimal   @db.Decimal(10, 2)
   currency         String
   customer         Customer @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   customerId       Int
   refunds          Refund[]
   returns          Return[]
+  shopId           Int
+  shop             Shop     @relation(fields: [shopId], references: [id])
 
   @@index([shopifyId], name: "OrderShopIdIndex")
 }
@@ -81,6 +87,8 @@ model Customer {
   lastName         String
   email            String
   orders           Order[]
+  shopId           Int
+  shop             Shop     @relation(fields: [shopId], references: [id])
 
   @@index([shopifyId], name: "CustomerShopIdIndex")
   @@index([email], name: "CustomerEmailIndex")
@@ -91,8 +99,10 @@ model Refund {
   shopifyId        String    @unique
   orderId          Int
   order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  totalRefunded    Decimal
+  totalRefunded    Decimal  @db.Decimal(10, 2)
   refundCurrency   String
+  shopId           Int
+  shop             Shop     @relation(fields: [shopId], references: [id])
 
   @@index([shopifyId], name: "RefundShopIdIndex")
 }
@@ -102,6 +112,9 @@ model Return {
   shopifyId        String    @unique
   orderId          Int
   order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  shopId           Int
+  shop             Shop     @relation(fields: [shopId], references: [id])
+
   @@index([shopifyId], name: "ReturnShopIdIndex")
 }
 
