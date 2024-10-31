@@ -2,16 +2,15 @@ import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { shop, topic } = await authenticate.webhook(request);
+  const { shop, topic, payload } = await authenticate.webhook(request);
 
   console.log(`Received ${topic} webhook for ${shop}`);
-  const payload = await request.json();
   processOrder(shop, payload).catch(console.error);
   return new Response();
 };
 
 const processOrder = async (shop: string, payload: any) => {
-  const shopifyId = payload.id;
+  const shopifyOrderId = payload.id;
   const totalCost = payload.total_price;
   const currency = payload.currency;
   const customerData = payload.customer;
@@ -38,7 +37,7 @@ const processOrder = async (shop: string, payload: any) => {
 
   const existingOrder = await prisma.order.findFirst({
     where: {
-      shopifyId,
+      shopifyId: `gid://shopify/Order/${shopifyOrderId}`,
       shopId: shopRecord.id,
     },
   });
@@ -46,7 +45,7 @@ const processOrder = async (shop: string, payload: any) => {
   if (!existingOrder) {
     await prisma.order.create({
       data: {
-        shopifyId,
+        shopifyId: `gid://shopify/Order/${shopifyOrderId}`,
         totalCost,
         currency,
         shopId: shopRecord.id,
