@@ -11,6 +11,11 @@ export enum BadgeText {
   OFF = "Off",
 }
 
+export enum ButtonText {
+  ENABLED = "Enabled",
+  DISABLED = "Disabled",
+}
+
 export interface StatusToggleProps {
   title: string;
   isEnabled: boolean;
@@ -24,7 +29,7 @@ const StatusToggle: FC<StatusToggleProps> = ({
 }) => {
   const badgeTone = isEnabled ? BadgeTone.SUCCESS : BadgeTone.CRITICAL;
   const badgeText = isEnabled ? BadgeText.ON : BadgeText.OFF;
-  const buttonText = isEnabled ? "Enabled" : "Disabled";
+  const buttonText = isEnabled ? ButtonText.ENABLED : ButtonText.DISABLED;
 
   return (
     <>

@@ -42,22 +42,20 @@ model Shop {
   customer       Customer[]
   refund         Refund[]
   return         Return[]
+  setting        Setting[]
 }
 
 model SyncOrdersTask {
-  id         Int                 @id @default(autoincrement())
-  shopId     Int
-  stage      SyncOrdersTaskStage
-  inProgress Boolean             @default(false)
-
-  data Json @default("{}")
-
-  retryCount Int     @default(0)
-  error      String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  shop      Shop     @relation(fields: [shopId], references: [id])
+  id             Int                 @id @default(autoincrement())
+  shopId         Int
+  stage          SyncOrdersTaskStage
+  inProgress     Boolean             @default(false)
+  data           Json                @default("{}")
+  retryCount     Int                 @default(0)
+  error          String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  shop           Shop                @relation(fields: [shopId], references: [id])
 
   @@index([shopId], name: "SyncOrdersTaskShopIdIndex")
   @@index([stage], name: "SyncOrdersTaskStageIndex")
@@ -120,6 +118,22 @@ model Return {
   @@index([shopifyId], name: "ReturnShopIdIndex")
 }
 
+model Setting {
+  id                               Int       @id @default(autoincrement())
+  shopId                           Int       @unique
+  isReturnStatus                   Boolean
+  isRefundStatus                   Boolean
+  isPartiallyRefundedStatus        Boolean
+  partialRefundPercentage          Int
+  shop                             Shop     @relation(fields: [shopId], references: [id])
+
+  @@index([shopId], name: "SettingShopIdIndex")
+  @@index([isReturnStatus], name: "SettingisReturnStatus")
+  @@index([isRefundStatus], name: "SettingisRefundStatus")
+  @@index([isPartiallyRefundedStatus], name: "SettingisPartiallyRefundedStatus")
+  @@index([partialRefundPercentage], name: "SettingpartialPercentage")
+}
+
 
 enum SyncOrdersTaskStage {
   CREATE_BULK_TASK
@@ -128,4 +142,3 @@ enum SyncOrdersTaskStage {
   PROCESS_RESULT
   FINISH
 }
-

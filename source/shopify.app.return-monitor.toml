@@ -3,7 +3,7 @@
 client_id = "13419ce5335967303fb8b4b14de9b911"
 name = "return-monitor"
 handle = "return-monitor-1"
-application_url = "https://glasgow-pumps-continent-madagascar.trycloudflare.com"
+application_url = "https://sc-mae-shortly-surprise.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_customers,read_orders,read_returns"
 
 [auth]
 redirect_urls = [
-  "https://glasgow-pumps-continent-madagascar.trycloudflare.com/auth/callback",
-  "https://glasgow-pumps-continent-madagascar.trycloudflare.com/auth/shopify/callback",
-  "https://glasgow-pumps-continent-madagascar.trycloudflare.com/api/auth/callback"
+  "https://sc-mae-shortly-surprise.trycloudflare.com/auth/callback",
+  "https://sc-mae-shortly-surprise.trycloudflare.com/auth/shopify/callback",
+  "https://sc-mae-shortly-surprise.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
