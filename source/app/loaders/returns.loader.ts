@@ -1,6 +1,28 @@
-import type { LoaderFunction } from "@remix-run/node";
+import type { LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
+import { authenticate } from "app/shopify.server";
 
-export const returnDataLoader: LoaderFunction = async () => {
+export const returnDataLoader: LoaderFunction = async ({
+  request,
+}: LoaderFunctionArgs) => {
+  const { session } = await authenticate.admin(request);
+  const shop = session.shop;
+
+  const shopRecord = await prisma.shop.findUnique({
+    where: { domain: shop },
+  });
+
+  if (!shopRecord) {
+    throw new Error(`Shop not found for domain: ${shop}`);
+  }
+
+  const settings = await prisma.setting.findUnique({
+    where: { shopId: shopRecord.id },
+  });
+
+  if (!settings) {
+    throw new Error("Settings not found for the shop");
+  }
+
   const data = await prisma.customer.findMany({
     select: {
       firstName: true,
@@ -10,9 +32,11 @@ export const returnDataLoader: LoaderFunction = async () => {
         select: {
           id: true,
           totalCost: true,
-          returns: {
+          returnStatus: true,
+          refundStatus: true,
+          refunds: {
             select: {
-              id: true,
+              totalRefunded: true,
             },
           },
         },
@@ -22,16 +46,57 @@ export const returnDataLoader: LoaderFunction = async () => {
 
   const orders = data.map((customer) => {
     const totalOrders = customer.orders.length;
-    const totalReturns = customer.orders.reduce(
-      (sum, order) => sum + order.returns.length,
-      0,
-    );
+
+    const totalReturns = customer.orders.reduce((sum, order) => {
+      const { returnStatus, refundStatus, refunds } = order;
+
+      if (settings.isReturnStatus && returnStatus === "RETURNED") {
+        return sum + 1;
+      }
+
+      if (settings.isRefundStatus && refundStatus === "REFUNDED") {
+        return sum + 1;
+      }
+
+      if (
+        settings.isPartiallyRefundedStatus &&
+        refundStatus === "PARTIALLY_REFUNDED" &&
+        refunds.length > 0
+      ) {
+        const totalRefundAmount = refunds.reduce(
+          (acc, refund) => acc + Number(refund.totalRefunded),
+          0,
+        );
+        const returnPercentage =
+          (totalRefundAmount * 100) / Number(order.totalCost);
+
+        if (returnPercentage > settings.partialRefundPercentage) {
+          return sum + 1;
+        }
+      }
+
+      return sum;
+    }, 0);
+
     const returnPercentage = totalOrders
       ? (totalReturns * 100) / totalOrders
       : 0;
+
     const costOfReturns = customer.orders.reduce((sum, order) => {
-      const orderReturns = order.returns.length;
-      return sum + (orderReturns > 0 ? Number(order.totalCost) : 0);
+      const isReturnedOrder =
+        (settings.isReturnStatus && order.returnStatus === "RETURNED") ||
+        (settings.isRefundStatus && order.refundStatus === "REFUNDED") ||
+        (settings.isPartiallyRefundedStatus &&
+          order.refundStatus === "PARTIALLY_REFUNDED" &&
+          (order.refunds.reduce(
+            (acc, refund) => acc + Number(refund.totalRefunded),
+            0,
+          ) *
+            100) /
+            Number(order.totalCost) >
+            settings.partialRefundPercentage);
+
+      return sum + (isReturnedOrder ? Number(order.totalCost) : 0);
     }, 0);
 
     return {
