@@ -186,7 +186,12 @@ export default function ReportTable() {
       <IndexTable.Cell>{order.totalOrders}</IndexTable.Cell>
       <IndexTable.Cell>{order.totalReturns}</IndexTable.Cell>
       <IndexTable.Cell>
-        <Badge>{`${order.returnPercentage}%`}</Badge>
+        <Badge
+          {...(order.returnPercentage <= 50 &&
+            order.returnPercentage > 0 && { tone: "critical" })}
+        >
+          {order.returnPercentage === 0 ? "N/A" : `${order.returnPercentage}%`}
+        </Badge>
       </IndexTable.Cell>
       <IndexTable.Cell>${order.costOfReturns.toFixed(2)}</IndexTable.Cell>
       <IndexTable.Cell>{order.email}</IndexTable.Cell>
