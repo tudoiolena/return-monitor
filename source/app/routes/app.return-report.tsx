@@ -1,5 +1,5 @@
 import type { LoaderFunction } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigate } from "@remix-run/react";
 import {
   IndexTable,
   LegacyCard,
@@ -11,7 +11,9 @@ import {
   Page,
   IndexFiltersMode,
   Badge,
+  Button,
 } from "@shopify/polaris";
+import { SettingsIcon } from "@shopify/polaris-icons";
 import { returnDataLoader } from "app/loaders/returns.loader";
 import { useState, useCallback } from "react";
 
@@ -31,6 +33,8 @@ export default function ReportTable() {
   const { orders }: { orders: Order[] } = useLoaderData<typeof loader>();
   const { mode, setMode } = useSetIndexFiltersMode(IndexFiltersMode.Filtering);
   const [queryValue, setQueryValue] = useState<string>("");
+
+  const navigate = useNavigate();
 
   const mappedOrders = orders.map((order) => ({ ...order, id: order.id }));
   const { selectedResources, allResourcesSelected, handleSelectionChange } =
@@ -189,8 +193,21 @@ export default function ReportTable() {
     </IndexTable.Row>
   ));
 
+  const primaryAction = useCallback(
+    () => (
+      <Button
+        onClick={() => navigate("/app/report-settings")}
+        variant="secondary"
+        icon={SettingsIcon}
+      >
+        Settings
+      </Button>
+    ),
+    [],
+  );
+
   return (
-    <Page>
+    <Page primaryAction={primaryAction()}>
       <LegacyCard>
         <IndexFilters
           sortOptions={sortOptions}
