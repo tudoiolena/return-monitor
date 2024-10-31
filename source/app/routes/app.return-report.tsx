@@ -10,6 +10,7 @@ import {
   useSetIndexFiltersMode,
   Page,
   IndexFiltersMode,
+  Badge,
 } from "@shopify/polaris";
 import { returnDataLoader } from "app/loaders/returns.loader";
 import { useState, useCallback } from "react";
@@ -166,11 +167,11 @@ export default function ReportTable() {
     return sortDirection * (aValue - bValue);
   });
 
-  const rowMarkup = sortedOrders.map((order) => (
+  const rowMarkup = sortedOrders.map((order, index) => (
     <IndexTable.Row
-      position={1}
+      position={index}
       id={order.id}
-      key={order.id}
+      key={`${order.id}-${index}`}
       selected={selectedResources.includes(order.id)}
     >
       <IndexTable.Cell>
@@ -180,7 +181,9 @@ export default function ReportTable() {
       </IndexTable.Cell>
       <IndexTable.Cell>{order.totalOrders}</IndexTable.Cell>
       <IndexTable.Cell>{order.totalReturns}</IndexTable.Cell>
-      <IndexTable.Cell>{order.returnPercentage.toFixed(2)}%</IndexTable.Cell>
+      <IndexTable.Cell>
+        <Badge>{`${order.returnPercentage}%`}</Badge>
+      </IndexTable.Cell>
       <IndexTable.Cell>${order.costOfReturns.toFixed(2)}</IndexTable.Cell>
       <IndexTable.Cell>{order.email}</IndexTable.Cell>
     </IndexTable.Row>

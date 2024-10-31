@@ -2,14 +2,14 @@
 
 client_id = "13419ce5335967303fb8b4b14de9b911"
 name = "return-monitor"
-handle = "return-monitor"
-application_url = "https://dallas-chi-invitation-subscription.trycloudflare.com"
+handle = "return-monitor-1"
+application_url = "https://glasgow-pumps-continent-madagascar.trycloudflare.com"
 embedded = true
 
 [build]
-automatically_update_urls_on_dev = true
-dev_store_url = "app-tutorial-test.myshopify.com"
 include_config_on_deploy = true
+dev_store_url = "app-tutorial-test.myshopify.com"
+automatically_update_urls_on_dev = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
@@ -17,9 +17,9 @@ scopes = "read_customers,read_orders,read_returns"
 
 [auth]
 redirect_urls = [
-  "https://dallas-chi-invitation-subscription.trycloudflare.com/auth/callback",
-  "https://dallas-chi-invitation-subscription.trycloudflare.com/auth/shopify/callback",
-  "https://dallas-chi-invitation-subscription.trycloudflare.com/api/auth/callback"
+  "https://glasgow-pumps-continent-madagascar.trycloudflare.com/auth/callback",
+  "https://glasgow-pumps-continent-madagascar.trycloudflare.com/auth/shopify/callback",
+  "https://glasgow-pumps-continent-madagascar.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
@@ -28,6 +28,26 @@ api_version = "2024-10"
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
   uri = "/webhooks/app/uninstalled"
+
+  [[webhooks.subscriptions]]
+  topics = [ "orders/create" ]
+  uri = "/webhooks/app/orders"
+
+  [[webhooks.subscriptions]]
+  topics = [ "returns/update" ]
+  uri = "/webhooks/app/return-update"
+
+  [[webhooks.subscriptions]]
+  topics = [ "returns/request" ]
+  uri = "/webhooks/app/return-create"
+
+  [[webhooks.subscriptions]]
+  topics = [ "returns/approve" ]
+  uri = "/webhooks/app/return-approve"
+
+  [[webhooks.subscriptions]]
+  topics = [ "returns/close" ]
+  uri = "/webhooks/app/return-close"
 
 [pos]
 embedded = false
