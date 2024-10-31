@@ -46,9 +46,9 @@ export const processResult = async (task: SyncOrdersTask) => {
     async function handleOrder(data: any) {
       const shopifyId = data.id;
       const totalCost = new Decimal(data.totalPriceSet.shopMoney.amount);
-
       const currency = data.totalPriceSet.shopMoney.currencyCode;
-
+      const returnStatus = data.returnStatus;
+      const refundStatus = data.displayFinancialStatus;
       const customerData = data.customer;
       const customer = await prisma.customer.upsert({
         where: { shopifyId: customerData.id },
@@ -71,6 +71,8 @@ export const processResult = async (task: SyncOrdersTask) => {
         update: {
           totalCost,
           currency,
+          returnStatus,
+          refundStatus,
           customerId: customer.id,
         },
         create: {
@@ -78,6 +80,8 @@ export const processResult = async (task: SyncOrdersTask) => {
           shopifyId,
           totalCost,
           currency,
+          returnStatus,
+          refundStatus,
           customerId: customer.id,
         },
       });

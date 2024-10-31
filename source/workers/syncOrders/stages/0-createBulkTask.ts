@@ -15,6 +15,8 @@ export const createBulkTask = async (task: SyncOrdersTask) => {
         edges {
           node {
             id
+            returnStatus
+            displayFinancialStatus
             customer {
               id
               email
@@ -47,7 +49,7 @@ export const createBulkTask = async (task: SyncOrdersTask) => {
         }
       }
     }
-    `;
+  `;
 
     const mutation = `
       mutation {
