@@ -126,6 +126,8 @@ model Setting {
   isPartiallyRefundedStatus        Boolean
   partialRefundPercentage          Int
   shop                             Shop     @relation(fields: [shopId], references: [id])
+  suspiciousReturnPercentage       Int
+  suspiciousReturnAmount           Int
 
   @@index([shopId], name: "SettingShopIdIndex")
   @@index([isReturnStatus], name: "SettingisReturnStatus")
