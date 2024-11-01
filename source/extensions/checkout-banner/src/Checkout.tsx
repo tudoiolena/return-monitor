@@ -1,22 +1,16 @@
 import {
   reactExtension,
   Banner,
-  BlockStack,
-  Checkbox,
-  // Text,
-  // useApi,
+  useApi,
   useApplyAttributeChange,
   useInstructions,
   useTranslate,
   useSettings,
 } from "@shopify/ui-extensions-react/checkout";
+import { useEffect } from "react";
 
 type Status = "info" | "warning" | "critical" | "success";
 
-// 1. Choose an extension target
-// export default reactExtension("purchase.checkout.block.render", () => (
-//   <Extension />
-// ));
 const checkoutBlock = reactExtension("purchase.checkout.block.render", () => (
   <Extension />
 ));
@@ -30,11 +24,8 @@ export { deliveryAddress };
 
 function Extension() {
   const translate = useTranslate();
-  // const { extension } = useApi();
   const instructions = useInstructions();
-  const applyAttributeChange = useApplyAttributeChange();
 
-  // Use the merchant-defined settings to retrieve the extension's content
   const {
     title: merchantTitle,
     description,
@@ -42,7 +33,6 @@ function Extension() {
     status: merchantStatus,
   } = useSettings();
 
-  // Set a default status for the banner if a merchant didn't configure the banner in the checkout editor
   const status: Status =
     merchantStatus === "info" ||
     merchantStatus === "warning" ||
@@ -52,11 +42,7 @@ function Extension() {
       : "info";
   const title = merchantTitle ?? "Custom Banner";
 
-  // 2. Check instructions for feature availability, see https://shopify.dev/docs/api/checkout-ui-extensions/apis/cart-instructions for details
   if (!instructions.attributes.canUpdateAttributes) {
-    // For checkouts such as draft order invoices, cart attributes may not be allowed
-    // Consider rendering a fallback UI or nothing at all, if the feature is unavailable
-
     return (
       <Banner title="checkout-banner" status="warning">
         {translate("attributeChangesAreNotSupported")}
@@ -64,34 +50,42 @@ function Extension() {
     );
   }
 
-  // 3. Render a UI
-  return (
-    <BlockStack border={"dotted"} padding={"tight"}>
-      {/* <Banner title="checkout-banner">
-        {translate("welcome", {
-          target: <Text emphasis="italic">{extension.target}</Text>,
-        })}
-      </Banner> */}
-      <Banner
-        title={String(title)}
-        status={status}
-        collapsible={Boolean(collapsible)}
-      >
-        {description}
-      </Banner>
-      <Checkbox onChange={onCheckboxChange}>
-        {translate("iWouldLikeAFreeGiftWithMyOrder")}
-      </Checkbox>
-    </BlockStack>
-  );
+  useEffect(() => {
+    async function checkWarning() {
+      try {
+        const response = await fetch(
+          "https://app-tutorial-test.myshopify.com/apps/proxytest",
+          {
+            method: "POST",
+            redirect: "manual",
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+          },
+        );
 
-  async function onCheckboxChange(isChecked) {
-    // 4. Call the API to modify checkout
-    const result = await applyAttributeChange({
-      key: "requestedFreeGift",
-      type: "updateAttribute",
-      value: isChecked ? "yes" : "no",
-    });
-    console.log("applyAttributeChange result", result);
-  }
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("data: ", data);
+      } catch (error) {
+        console.error("Failed to fetch warning data:", error);
+      }
+    }
+
+    checkWarning();
+  }, []);
+
+  return (
+    <Banner
+      title={String(title)}
+      status={status}
+      collapsible={Boolean(collapsible)}
+    >
+      {description}
+    </Banner>
+  );
 }
