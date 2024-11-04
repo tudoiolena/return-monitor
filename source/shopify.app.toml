@@ -3,7 +3,7 @@
 client_id = "13419ce5335967303fb8b4b14de9b911"
 name = "return-monitor"
 handle = "return-monitor-1"
-application_url = "https://strikes-consultancy-est-prince.trycloudflare.com"
+application_url = "https://layer-indicates-accordingly-avon.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_customers,read_orders,read_returns"
 
 [auth]
 redirect_urls = [
-  "https://strikes-consultancy-est-prince.trycloudflare.com/auth/callback",
-  "https://strikes-consultancy-est-prince.trycloudflare.com/auth/shopify/callback",
-  "https://strikes-consultancy-est-prince.trycloudflare.com/api/auth/callback"
+  "https://layer-indicates-accordingly-avon.trycloudflare.com/auth/callback",
+  "https://layer-indicates-accordingly-avon.trycloudflare.com/auth/shopify/callback",
+  "https://layer-indicates-accordingly-avon.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

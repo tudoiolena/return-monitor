@@ -1,10 +1,36 @@
 import { exec } from "child_process";
-import type { ActionFunction } from "@remix-run/node";
-import { Button, Card, Page } from "@shopify/polaris";
-import { useCallback } from "react";
-import { Form } from "@remix-run/react";
+import type { ActionFunction, LoaderFunction } from "@remix-run/node";
+import {
+  BlockStack,
+  Button,
+  Card,
+  Page,
+  ProgressBar,
+  TextField,
+} from "@shopify/polaris";
+import { useCallback, useEffect, useState } from "react";
+import { Form, json, useLoaderData } from "@remix-run/react";
 import { $Enums } from "@prisma/client";
 import { getAdminContext } from "app/shopify.server";
+
+const progressMapping: Record<$Enums.SyncOrdersTaskStage, number> = {
+  CREATE_BULK_TASK: 20,
+  WAIT_FOR_FINISH: 40,
+  DOWNLOAD_RESULT: 60,
+  PROCESS_RESULT: 80,
+  FINISH: 100,
+};
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const adminContext = await getAdminContext(request);
+  const task = await prisma.syncOrdersTask.findFirst({
+    where: {
+      shop: { domain: adminContext.session.shop },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  return json({ task });
+};
 
 export const action: ActionFunction = async ({ request }) => {
   const adminContext = await getAdminContext(request);
@@ -13,7 +39,7 @@ export const action: ActionFunction = async ({ request }) => {
     where: { domain: adminContext.session.shop },
   });
 
-  await prisma.syncOrdersTask.create({
+  const newTask = await prisma.syncOrdersTask.create({
     data: {
       shop: { connect: { id: shopId } },
       stage: $Enums.SyncOrdersTaskStage.CREATE_BULK_TASK,
@@ -33,22 +59,49 @@ export const action: ActionFunction = async ({ request }) => {
     console.log(`Command stdout: ${stdout}`);
   });
 
-  console.log("Order task created and worker started.123");
+  console.log("Order task created and worker started.");
 
-  return new Response("Order task created and worker started.", {
-    status: 200,
-  });
+  return json(newTask);
 };
 
 export default function BulkOrderExport() {
+  const { task } = useLoaderData<typeof loader>();
+  const [taskData, setTaskData] = useState(task);
+
+  const currentProgress = taskData?.task?.stage
+    ? progressMapping[taskData.task.stage as $Enums.SyncOrdersTaskStage]
+    : 0;
+
+  const isLoading =
+    taskData?.task?.stage != $Enums.SyncOrdersTaskStage.FINISH ||
+    taskData?.task?.error;
+
   const primaryAction = useCallback(
     () => (
-      <Button submit={true} variant="primary">
+      <Button submit={true} variant="primary" loading={isLoading}>
         Start importing orders
       </Button>
     ),
-    [],
+    [isLoading],
   );
+
+  useEffect(() => {
+    const fetchTaskData = async () => {
+      const response = await fetch("/app/api/task");
+      if (response.ok) {
+        const data = await response.json();
+        setTaskData(data);
+      } else {
+        console.error("Failed to fetch task data");
+        setTimeout(fetchTaskData, 2000);
+      }
+    };
+
+    fetchTaskData();
+    const intervalId = setInterval(fetchTaskData, 5000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <Form method="post">
@@ -56,7 +109,29 @@ export default function BulkOrderExport() {
         <Page
           primaryAction={primaryAction()}
           subtitle="Click the button to initiate a bulk order export for orders."
-        ></Page>
+        >
+          <BlockStack gap="400">
+            <ProgressBar progress={currentProgress} />
+            <TextField
+              label="Task ID:"
+              value={taskData?.task?.id}
+              disabled
+              autoComplete="off"
+            />
+            <TextField
+              label="Status:"
+              value={taskData?.task?.stage}
+              disabled
+              autoComplete="off"
+            />
+            <TextField
+              label="Created At:"
+              value={taskData?.task?.createdAt}
+              disabled
+              autoComplete="off"
+            />
+          </BlockStack>
+        </Page>
       </Card>
     </Form>
   );
