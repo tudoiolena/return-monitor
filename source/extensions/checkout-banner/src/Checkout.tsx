@@ -56,12 +56,12 @@ function Extension() {
         const response = await fetch(
           "https://app-tutorial-test.myshopify.com/apps/proxytest",
           {
-            method: "POST",
-            redirect: "manual",
-            headers: {
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
-            },
+            method: "GET",
+            // redirect: "manual",
+            // headers: {
+            //   "Content-Type": "application/json",
+            //   "Access-Control-Allow-Origin": "*",
+            // },
           },
         );
 
