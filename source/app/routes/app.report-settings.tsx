@@ -70,7 +70,7 @@ export default function ReportSettings() {
     <Form method="post">
       <Page
         title="Settings"
-        backAction={{ url: `app/return-report` }} //FIXME: Update route!
+        backAction={{ url: `/app/return-report` }}
         primaryAction={primaryAction()}
       >
         <BlockStack gap="400">
