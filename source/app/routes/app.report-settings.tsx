@@ -9,6 +9,7 @@ import {
   TextField,
 } from "@shopify/polaris";
 import StatusToggle from "app/components/StatusToggle";
+import { AdminNavigation } from "app/constants/navigation";
 import { useCallback, useState } from "react";
 
 export { action } from "app/actions/app/report-settings.action";
@@ -70,7 +71,7 @@ export default function ReportSettings() {
     <Form method="post">
       <Page
         title="Settings"
-        backAction={{ url: `/app/return-report` }}
+        backAction={{ url: AdminNavigation.report }}
         primaryAction={primaryAction()}
       >
         <BlockStack gap="400">

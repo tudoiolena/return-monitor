@@ -14,6 +14,7 @@ import {
   Button,
 } from "@shopify/polaris";
 import { SettingsIcon } from "@shopify/polaris-icons";
+import { AdminNavigation } from "app/constants/navigation";
 import { returnDataLoader } from "app/loaders/returns.loader";
 import { useState, useCallback } from "react";
 
@@ -203,7 +204,7 @@ export default function ReportTable() {
   const primaryAction = useCallback(
     () => (
       <Button
-        onClick={() => navigate("/app/report-settings")}
+        onClick={() => navigate(AdminNavigation.reportSettings)}
         variant="secondary"
         icon={SettingsIcon}
       >

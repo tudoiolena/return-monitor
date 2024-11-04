@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Form, json, useLoaderData } from "@remix-run/react";
 import { $Enums } from "@prisma/client";
 import { getAdminContext } from "app/shopify.server";
+import { ApiNavigation } from "app/constants/navigation";
 
 const progressMapping: Record<$Enums.SyncOrdersTaskStage, number> = {
   CREATE_BULK_TASK: 20,
@@ -87,7 +88,7 @@ export default function BulkOrderExport() {
 
   useEffect(() => {
     const fetchTaskData = async () => {
-      const response = await fetch("/app/api/task");
+      const response = await fetch(ApiNavigation.bulkTask);
       if (response.ok) {
         const data = await response.json();
         setTaskData(data);
