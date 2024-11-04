@@ -190,7 +190,9 @@ export default function ReportTable() {
           {...(order.returnPercentage <= 50 &&
             order.returnPercentage > 0 && { tone: "critical" })}
         >
-          {order.returnPercentage === 0 ? "N/A" : `${order.returnPercentage}%`}
+          {order.returnPercentage === 0
+            ? "N/A"
+            : `${order.returnPercentage.toFixed(2)}%`}
         </Badge>
       </IndexTable.Cell>
       <IndexTable.Cell>${order.costOfReturns.toFixed(2)}</IndexTable.Cell>

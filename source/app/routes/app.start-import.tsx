@@ -105,11 +105,11 @@ export default function BulkOrderExport() {
 
   return (
     <Form method="post">
-      <Card>
-        <Page
-          primaryAction={primaryAction()}
-          subtitle="Click the button to initiate a bulk order export for orders."
-        >
+      <Page
+        primaryAction={primaryAction()}
+        subtitle="Click the button to initiate a bulk order export for orders."
+      >
+        <Card>
           <BlockStack gap="400">
             <ProgressBar progress={currentProgress} />
             <TextField
@@ -131,8 +131,8 @@ export default function BulkOrderExport() {
               autoComplete="off"
             />
           </BlockStack>
-        </Page>
-      </Card>
+        </Card>
+      </Page>
     </Form>
   );
 }
