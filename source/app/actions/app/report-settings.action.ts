@@ -20,8 +20,6 @@ export const action = async ({ request }: { request: Request }) => {
 
   const formData = await request.formData();
 
-  console.log("11 Forma DATA:", formData);
-
   const isReturnStatus = formData.get("isReturnStatus") === "true";
   const isRefundStatus = formData.get("isRefundEnabled") === "true";
   const isPartiallyRefundedStatus =

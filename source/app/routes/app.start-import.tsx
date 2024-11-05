@@ -1,4 +1,3 @@
-import { exec } from "child_process";
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import {
   BlockStack,
@@ -47,20 +46,6 @@ export const action: ActionFunction = async ({ request }) => {
       inProgress: false,
     },
   });
-
-  exec(`npx tsx workers/index.ts`, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Error executing command: ${error.message}`);
-      return;
-    }
-    if (stderr) {
-      console.error(`Command stderr: ${stderr}`);
-      return;
-    }
-    console.log(`Command stdout: ${stdout}`);
-  });
-
-  console.log("Order task created and worker started.");
 
   return json(newTask);
 };

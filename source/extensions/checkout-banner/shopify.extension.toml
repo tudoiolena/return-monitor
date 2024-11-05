@@ -17,13 +17,8 @@ type = "ui_extension"
 
 [[extensions.targeting]]
 module = "./src/Checkout.tsx"
-target = "purchase.checkout.block.render"
+target = "purchase.checkout.cart-line-list.render-after"
 export = "checkoutBlock"
-
-[[extensions.targeting]]
-target = "purchase.checkout.delivery-address.render-before"
-module = "./src/Checkout.tsx"
-export = "deliveryAddress"
 
 
 [extensions.capabilities]
@@ -46,6 +41,10 @@ network_access = true
 # [[extensions.metafields]]
 # namespace = "my_namespace"
 # key = "my_other_key"
+
+[[extensions.metafields]]
+namespace = "custom_data"
+key = "isCustomerSuspicious"
 
 # Defines settings that will be collected from merchants installing
 # your extension. Learn more:

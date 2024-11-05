@@ -3,7 +3,7 @@
 client_id = "13419ce5335967303fb8b4b14de9b911"
 name = "return-monitor"
 handle = "return-monitor-1"
-application_url = "https://layer-indicates-accordingly-avon.trycloudflare.com"
+application_url = "https://resistant-jade-britain-thereof.trycloudflare.com"
 embedded = true
 
 [build]
@@ -13,13 +13,13 @@ automatically_update_urls_on_dev = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "read_customers,read_orders,read_returns"
+scopes = "read_customers,write_customers,read_orders,read_returns"
 
 [auth]
 redirect_urls = [
-  "https://layer-indicates-accordingly-avon.trycloudflare.com/auth/callback",
-  "https://layer-indicates-accordingly-avon.trycloudflare.com/auth/shopify/callback",
-  "https://layer-indicates-accordingly-avon.trycloudflare.com/api/auth/callback"
+  "https://resistant-jade-britain-thereof.trycloudflare.com/auth/callback",
+  "https://resistant-jade-britain-thereof.trycloudflare.com/auth/shopify/callback",
+  "https://resistant-jade-britain-thereof.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
