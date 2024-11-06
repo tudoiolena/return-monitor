@@ -3,7 +3,7 @@ import {
   Banner,
   useSettings,
   // useApi,
-  // useCustomer,
+  useCustomer,
   useAppMetafields,
 } from "@shopify/ui-extensions-react/checkout";
 
@@ -18,14 +18,21 @@ export { checkoutBlock };
 function Extension() {
   // const { query, sessionToken, shop } = useApi();
 
-  // const customer = useCustomer();
+  const customer = useCustomer();
+  const customerId = customer.id.split("/").pop();
 
-  const exampleShopMetafield = useAppMetafields({
+  const metafieldValue = useAppMetafields({
     namespace: "custom_data",
     key: "isCustomerSuspicious",
   });
 
-  console.log("isCustomerSuspicious", exampleShopMetafield);
+  console.log("isCustomerSuspicious", metafieldValue);
+
+  const isSuspicious = metafieldValue[1]?.metafield.value
+    ? JSON.parse(metafieldValue[1]?.metafield.value as string).includes(
+        customerId,
+      )
+    : false;
 
   const {
     title: merchantTitle,
@@ -46,12 +53,16 @@ function Extension() {
   const description = merchantDescription ?? "Some description";
 
   return (
-    <Banner
-      title={String(title)}
-      status={status}
-      collapsible={Boolean(collapsible)}
-    >
-      {description}
-    </Banner>
+    <>
+      {isSuspicious && (
+        <Banner
+          title={String(title)}
+          status={status}
+          collapsible={Boolean(collapsible)}
+        >
+          {description}
+        </Banner>
+      )}
+    </>
   );
 }

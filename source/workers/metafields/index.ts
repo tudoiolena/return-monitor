@@ -1,5 +1,13 @@
-import type { Customer, Order, Refund, Return, Setting } from "@prisma/client";
+import type {
+  Customer,
+  Order,
+  Refund,
+  Return,
+  Setting,
+  Shop,
+} from "@prisma/client";
 import { PrismaClient } from "@prisma/client";
+import { unauthenticated } from "app/shopify.server";
 
 type CustomerWithOrders = Customer & {
   orders: (Order & {
@@ -9,9 +17,6 @@ type CustomerWithOrders = Customer & {
 };
 
 const prisma = new PrismaClient();
-
-const SHOPIFY_SHOP = "app-tutorial-test.myshopify.com";
-const ACCESS_TOKEN = "shpua_b5417b0f2def50ac2cfefa67fcfcce49";
 
 async function checkAndUpdateCustomerSuspicion() {
   const settings = await prisma.setting.findMany();
@@ -26,12 +31,24 @@ async function checkAndUpdateCustomerSuspicion() {
       },
     });
 
+    const shop = await prisma.shop.findFirst({ where: { id: setting.shopId } });
+
+    const suspiciousCustomers: string[] = [];
+
     for (const customer of customers) {
       const isSuspicious = calculateSuspicion(customer, setting);
 
-      console.log("customer.shopifyId", customer.shopifyId);
-      console.log("isSuspicious", isSuspicious);
-      await updateShopifyMetafield(customer.shopifyId, isSuspicious);
+      if (isSuspicious) {
+        const customerShopifyId = customer.shopifyId.split("/").pop();
+        console.log("customer.shopifyId", customerShopifyId);
+        if (customerShopifyId) {
+          suspiciousCustomers.push(customerShopifyId);
+        }
+      }
+    }
+
+    if (suspiciousCustomers.length > 0) {
+      await updateShopifyMetafield(suspiciousCustomers, shop!);
     }
   }
 }
@@ -60,18 +77,37 @@ function calculateSuspicion(customer: CustomerWithOrders, setting: Setting) {
 }
 
 async function updateShopifyMetafield(
-  customerShopifyId: string,
-  isSuspicious: boolean,
+  suspiciousCustomers: string[],
+  shop: Shop,
 ) {
-  const query = `
+  const {
+    admin: { graphql },
+  } = await unauthenticated.admin(shop.domain);
+
+  const shopDetailsQuery = `
+  {
+    shop {
+      id
+    }
+  }
+`;
+
+  const shopDetailsResponse = await graphql(shopDetailsQuery);
+  const shopData = await shopDetailsResponse.json();
+  const shopId = shopData.data.shop.id;
+
+  const serializedSuspiciousCustomers =
+    `[` + suspiciousCustomers.map((id) => `\\"${id}\\"`).join(",") + `]`;
+
+  const mutation = `
     mutation {
       metafieldsSet(metafields: [
         {
           namespace: "custom_data",
           key: "isCustomerSuspicious",
-          value: "${isSuspicious}",
-          type: "boolean",
-          ownerId: "${customerShopifyId}"
+          value: "${serializedSuspiciousCustomers}",
+          type: "list.single_line_text_field",
+          ownerId: "${shopId}"
         }
       ]) {
         userErrors {
@@ -88,26 +124,13 @@ async function updateShopifyMetafield(
     }
   `;
 
-  const response = await fetch(
-    `https://${SHOPIFY_SHOP}/admin/api/2024-01/graphql.json`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Shopify-Access-Token": ACCESS_TOKEN,
-      },
-      body: JSON.stringify({ query }),
-    },
-  );
+  const result = await graphql(mutation);
+  const data = await result.json();
 
-  const data = await response.json();
-  if (data.errors) {
-    console.error("Failed to update metafield:", data.errors);
+  if (result.ok) {
+    console.log("Metafield updated successfully:", data.data.metafieldsSet);
   } else {
-    console.log(
-      "Metafield updated successfully:",
-      data.data.metafieldsSet.metafields,
-    );
+    throw new Error(JSON.stringify(data));
   }
 }
 
