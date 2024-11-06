@@ -22,14 +22,14 @@ function Extension() {
   const customerId = customer.id.split("/").pop();
 
   const metafieldValue = useAppMetafields({
-    namespace: "custom_data",
-    key: "isCustomerSuspicious",
+    namespace: "return_monitor",
+    key: "suspiciousCustomers",
   });
 
-  console.log("isCustomerSuspicious", metafieldValue);
+  console.log("suspiciousCustomers", metafieldValue);
 
-  const isSuspicious = metafieldValue[1]?.metafield.value
-    ? JSON.parse(metafieldValue[1]?.metafield.value as string).includes(
+  const isSuspicious = metafieldValue[0]?.metafield.value
+    ? JSON.parse(metafieldValue[0]?.metafield.value as string).includes(
         customerId,
       )
     : false;

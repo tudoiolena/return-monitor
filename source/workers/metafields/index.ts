@@ -71,7 +71,7 @@ function calculateSuspicion(customer: CustomerWithOrders, setting: Setting) {
   );
 
   return (
-    returnRate >= setting.suspiciousReturnPercentage ||
+    returnRate >= setting.suspiciousReturnPercentage &&
     refundAmount >= setting.suspiciousReturnAmount
   );
 }
@@ -103,8 +103,8 @@ async function updateShopifyMetafield(
     mutation {
       metafieldsSet(metafields: [
         {
-          namespace: "custom_data",
-          key: "isCustomerSuspicious",
+          namespace: "return_monitor",
+          key: "suspiciousCustomers",
           value: "${serializedSuspiciousCustomers}",
           type: "list.single_line_text_field",
           ownerId: "${shopId}"
