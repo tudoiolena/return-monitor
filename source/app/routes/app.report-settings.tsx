@@ -18,7 +18,7 @@ export const DEFAULT_RANGE_VALUE = 30;
 export const DEFAULT_SUSPICIOUS_RANGE_VALUE = 30;
 export const DEFAULT_SUSPICIOUS_RETURN_VALUE = 2;
 
-export { action } from "app/actions/app/report-settings.action";
+export { action } from "app/actions/report-settings.action";
 
 export const loader: LoaderFunction = settingsLoader;
 

@@ -12,6 +12,7 @@ import {
   IndexFiltersMode,
   Badge,
   Button,
+  Pagination,
 } from "@shopify/polaris";
 import { SettingsIcon } from "@shopify/polaris-icons";
 import { AdminNavigation } from "app/constants/navigation";
@@ -28,12 +29,15 @@ interface Order {
   costOfReturns: number;
 }
 
+const ITEMS_PER_PAGE = 10;
+
 export const loader: LoaderFunction = returnDataLoader;
 
 export default function ReportTable() {
   const { orders }: { orders: Order[] } = useLoaderData<typeof loader>();
   const { mode, setMode } = useSetIndexFiltersMode(IndexFiltersMode.Filtering);
   const [queryValue, setQueryValue] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const navigate = useNavigate();
 
@@ -172,7 +176,13 @@ export default function ReportTable() {
     return sortDirection * (aValue - bValue);
   });
 
-  const rowMarkup = sortedOrders.map((order, index) => (
+  const totalPages = Math.ceil(sortedOrders.length / ITEMS_PER_PAGE);
+  const paginatedOrders = sortedOrders.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
+  const rowMarkup = paginatedOrders.map((order, index) => (
     <IndexTable.Row
       position={index}
       id={order.id}
@@ -213,6 +223,10 @@ export default function ReportTable() {
     ),
     [],
   );
+
+  const handleNextPage = () =>
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  const handlePrevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
 
   return (
     <Page primaryAction={primaryAction()}>
@@ -260,6 +274,15 @@ export default function ReportTable() {
         >
           {rowMarkup}
         </IndexTable>
+
+        <Pagination
+          onPrevious={handlePrevPage}
+          onNext={handleNextPage}
+          type="table"
+          hasNext
+          hasPrevious
+          label={`${currentPage} of ${totalPages}`}
+        />
       </LegacyCard>
     </Page>
   );
