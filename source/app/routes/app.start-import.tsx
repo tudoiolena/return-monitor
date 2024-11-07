@@ -1,13 +1,16 @@
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import {
+  Banner,
   BlockStack,
   Button,
   Card,
   Page,
   ProgressBar,
   TextField,
+  Text,
+  Box,
 } from "@shopify/polaris";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Form, json, useLoaderData } from "@remix-run/react";
 import { $Enums } from "@prisma/client";
 import { getAdminContext } from "app/shopify.server";
@@ -62,15 +65,6 @@ export default function BulkOrderExport() {
     taskData?.task?.stage != $Enums.SyncOrdersTaskStage.FINISH ||
     taskData?.task?.error;
 
-  const primaryAction = useCallback(
-    () => (
-      <Button submit={true} variant="primary" loading={isLoading}>
-        Start importing orders
-      </Button>
-    ),
-    [isLoading],
-  );
-
   useEffect(() => {
     const fetchTaskData = async () => {
       const response = await fetch(ApiNavigation.bulkTask);
@@ -91,13 +85,47 @@ export default function BulkOrderExport() {
 
   return (
     <Form method="post">
-      <Page
-        primaryAction={primaryAction()}
-        subtitle="Click the button to initiate a bulk order export for orders."
-      >
-        <Card>
-          <BlockStack gap="400">
-            <ProgressBar progress={currentProgress} />
+      <Page>
+        <BlockStack gap="400">
+          <Card>
+            <BlockStack gap="400">
+              <BlockStack gap="200">
+                <Text as="h2" variant="headingLg">
+                  Start
+                </Text>
+                <Text as="p">
+                  Click the button to initiate a bulk export for orders.
+                </Text>
+                <Box>
+                  <Button submit={true} variant="secondary" loading={isLoading}>
+                    Start importing orders
+                  </Button>
+                </Box>
+              </BlockStack>
+
+              <BlockStack gap="400">
+                <ProgressBar
+                  progress={currentProgress}
+                  tone={currentProgress === 100 ? "success" : "primary"}
+                  size="small"
+                />
+                {currentProgress === 100 ? (
+                  <Banner tone="success" title="Success">
+                    <Text as="p">The import finish successfully</Text>
+                  </Banner>
+                ) : (
+                  <Banner title="Wait the operation to be finished">
+                    <Text as="p">
+                      Wait until the order importing will be finished
+                    </Text>
+                  </Banner>
+                )}
+              </BlockStack>
+            </BlockStack>
+          </Card>
+
+          <Card>
+            <Text as="h4">Latest import task info</Text>
             <TextField
               label="Task ID:"
               value={taskData?.task?.id}
@@ -116,8 +144,8 @@ export default function BulkOrderExport() {
               disabled
               autoComplete="off"
             />
-          </BlockStack>
-        </Card>
+          </Card>
+        </BlockStack>
       </Page>
     </Form>
   );
