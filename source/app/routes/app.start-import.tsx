@@ -1,4 +1,4 @@
-import type { ActionFunction, LoaderFunction } from "@remix-run/node";
+import type { LoaderFunction } from "@remix-run/node";
 import {
   Banner,
   BlockStack,
@@ -11,10 +11,10 @@ import {
   Box,
 } from "@shopify/polaris";
 import { useEffect, useState } from "react";
-import { Form, json, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 import { $Enums } from "@prisma/client";
-import { getAdminContext } from "app/shopify.server";
 import { ApiNavigation } from "app/constants/navigation";
+import { apiTaskLoader } from "app/loaders/api.task.loader";
 
 const progressMapping: Record<$Enums.SyncOrdersTaskStage, number> = {
   CREATE_BULK_TASK: 20,
@@ -24,46 +24,21 @@ const progressMapping: Record<$Enums.SyncOrdersTaskStage, number> = {
   FINISH: 100,
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const adminContext = await getAdminContext(request);
-  const task = await prisma.syncOrdersTask.findFirst({
-    where: {
-      shop: { domain: adminContext.session.shop },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-  return json({ task });
-};
-
-export const action: ActionFunction = async ({ request }) => {
-  const adminContext = await getAdminContext(request);
-
-  const { id: shopId } = await prisma.shop.findUniqueOrThrow({
-    where: { domain: adminContext.session.shop },
-  });
-
-  const newTask = await prisma.syncOrdersTask.create({
-    data: {
-      shop: { connect: { id: shopId } },
-      stage: $Enums.SyncOrdersTaskStage.CREATE_BULK_TASK,
-      inProgress: false,
-    },
-  });
-
-  return json(newTask);
-};
+export const loader: LoaderFunction = apiTaskLoader;
+export { action } from "app/actions/start-import.action";
 
 export default function BulkOrderExport() {
   const { task } = useLoaderData<typeof loader>();
   const [taskData, setTaskData] = useState(task);
-
+  console.log("taskData", taskData);
   const currentProgress = taskData?.task?.stage
     ? progressMapping[taskData.task.stage as $Enums.SyncOrdersTaskStage]
     : 0;
 
   const isLoading =
-    taskData?.task?.stage != $Enums.SyncOrdersTaskStage.FINISH ||
-    taskData?.task?.error;
+    taskData?.task &&
+    (taskData.task.stage !== $Enums.SyncOrdersTaskStage.FINISH ||
+      taskData.task.error);
 
   useEffect(() => {
     const fetchTaskData = async () => {
@@ -89,7 +64,7 @@ export default function BulkOrderExport() {
         <BlockStack gap="400">
           <Card>
             <BlockStack gap="400">
-              <BlockStack gap="200">
+              <BlockStack gap="300">
                 <Text as="h2" variant="headingLg">
                   Start
                 </Text>
@@ -103,48 +78,52 @@ export default function BulkOrderExport() {
                 </Box>
               </BlockStack>
 
-              <BlockStack gap="400">
-                <ProgressBar
-                  progress={currentProgress}
-                  tone={currentProgress === 100 ? "success" : "primary"}
-                  size="small"
-                />
-                {currentProgress === 100 ? (
-                  <Banner tone="success" title="Success">
-                    <Text as="p">The import finish successfully</Text>
-                  </Banner>
-                ) : (
-                  <Banner title="Wait the operation to be finished">
-                    <Text as="p">
-                      Wait until the order importing will be finished
-                    </Text>
-                  </Banner>
-                )}
-              </BlockStack>
+              {taskData?.task && (
+                <BlockStack gap="400">
+                  <ProgressBar
+                    progress={currentProgress}
+                    tone={currentProgress === 100 ? "success" : "primary"}
+                    size="small"
+                  />
+                  {currentProgress === 100 ? (
+                    <Banner tone="success" title="Success">
+                      <Text as="p">The import is finished successfully</Text>
+                    </Banner>
+                  ) : (
+                    <Banner title="Wait the operation to be finished">
+                      <Text as="p">
+                        Wait until the order importing will be finished
+                      </Text>
+                    </Banner>
+                  )}
+                </BlockStack>
+              )}
             </BlockStack>
           </Card>
 
-          <Card>
-            <Text as="h4">Latest import task info</Text>
-            <TextField
-              label="Task ID:"
-              value={taskData?.task?.id}
-              disabled
-              autoComplete="off"
-            />
-            <TextField
-              label="Status:"
-              value={taskData?.task?.stage}
-              disabled
-              autoComplete="off"
-            />
-            <TextField
-              label="Created At:"
-              value={taskData?.task?.createdAt}
-              disabled
-              autoComplete="off"
-            />
-          </Card>
+          {taskData?.task && (
+            <Card>
+              <Text as="h4">Latest import task info</Text>
+              <TextField
+                label="Task ID:"
+                value={taskData?.task?.id}
+                disabled
+                autoComplete="off"
+              />
+              <TextField
+                label="Status:"
+                value={taskData?.task?.stage}
+                disabled
+                autoComplete="off"
+              />
+              <TextField
+                label="Created At:"
+                value={taskData?.task?.createdAt}
+                disabled
+                autoComplete="off"
+              />
+            </Card>
+          )}
         </BlockStack>
       </Page>
     </Form>
