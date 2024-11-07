@@ -1,3 +1,4 @@
+import { checkAndUpdateCustomerSuspicion } from "./metafields";
 import { syncOrders } from "./syncOrders";
 
 setInterval(() => {
@@ -5,6 +6,15 @@ setInterval(() => {
 
   syncOrders().catch(console.error);
 }, 1000 * 30);
+
+setInterval(
+  () => {
+    console.log("Checking suspicious customers worker is running");
+
+    checkAndUpdateCustomerSuspicion().catch(console.error);
+  },
+  1000 * 60 * 5,
+);
 
 // const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 //

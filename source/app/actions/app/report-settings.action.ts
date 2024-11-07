@@ -1,4 +1,5 @@
-import { json } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
+import { AdminNavigation } from "app/constants/navigation";
 import {
   DEFAULT_RANGE_VALUE,
   DEFAULT_SUSPICIOUS_RANGE_VALUE,
@@ -54,5 +55,5 @@ export const action = async ({ request }: { request: Request }) => {
     },
   });
 
-  return json({ success: true });
+  return redirect(AdminNavigation.report);
 };

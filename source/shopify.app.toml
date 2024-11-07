@@ -3,7 +3,7 @@
 client_id = "13419ce5335967303fb8b4b14de9b911"
 name = "return-monitor"
 handle = "return-monitor-1"
-application_url = "https://stages-antibody-javascript-mini.trycloudflare.com"
+application_url = "https://wishlist-guest-evaluated-nodes.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_customers,write_customers,read_orders,read_returns"
 
 [auth]
 redirect_urls = [
-  "https://stages-antibody-javascript-mini.trycloudflare.com/auth/callback",
-  "https://stages-antibody-javascript-mini.trycloudflare.com/auth/shopify/callback",
-  "https://stages-antibody-javascript-mini.trycloudflare.com/api/auth/callback"
+  "https://wishlist-guest-evaluated-nodes.trycloudflare.com/auth/callback",
+  "https://wishlist-guest-evaluated-nodes.trycloudflare.com/auth/shopify/callback",
+  "https://wishlist-guest-evaluated-nodes.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

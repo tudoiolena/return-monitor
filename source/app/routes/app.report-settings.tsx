@@ -1,4 +1,5 @@
-import { Form } from "@remix-run/react";
+import type { LoaderFunction } from "@remix-run/node";
+import { Form, useLoaderData } from "@remix-run/react";
 import {
   BlockStack,
   Button,
@@ -10,15 +11,19 @@ import {
 } from "@shopify/polaris";
 import StatusToggle from "app/components/StatusToggle";
 import { AdminNavigation } from "app/constants/navigation";
+import { settingsLoader } from "app/loaders/settings.loader";
 import { useCallback, useState } from "react";
-
-export { action } from "app/actions/app/report-settings.action";
 
 export const DEFAULT_RANGE_VALUE = 30;
 export const DEFAULT_SUSPICIOUS_RANGE_VALUE = 30;
 export const DEFAULT_SUSPICIOUS_RETURN_VALUE = 2;
 
+export { action } from "app/actions/app/report-settings.action";
+
+export const loader: LoaderFunction = settingsLoader;
+
 export default function ReportSettings() {
+  const { settings } = useLoaderData<typeof loader>();
   const primaryAction = useCallback(
     () => (
       <Button variant="primary" submit={true}>
@@ -28,10 +33,15 @@ export default function ReportSettings() {
     [],
   );
 
-  const [isReturnedEnabled, setIsReturnedEnabled] = useState(true);
-  const [isRefundEnabled, setIsRefundEnabled] = useState(true);
-  const [isPartiallyRefundedEnabled, setIsPartiallyRefundedEnabled] =
-    useState(true);
+  const [isReturnedEnabled, setIsReturnedEnabled] = useState(
+    settings.isReturnStatus,
+  );
+  const [isRefundEnabled, setIsRefundEnabled] = useState(
+    settings.isRefundStatus,
+  );
+  const [isPartiallyRefundedEnabled, setIsPartiallyRefundedEnabled] = useState(
+    settings.isPartiallyRefundedStatus,
+  );
   const [rangeValue, setRangeValue] = useState(DEFAULT_RANGE_VALUE);
   const [suspiciousRangeValue, setsuspiciousRangeValue] = useState(
     DEFAULT_SUSPICIOUS_RANGE_VALUE,
@@ -41,15 +51,15 @@ export default function ReportSettings() {
   );
 
   const handleReturnToggle = () => {
-    setIsReturnedEnabled((prev) => !prev);
+    setIsReturnedEnabled((prev: boolean) => !prev);
   };
 
   const handleRefundToggle = () => {
-    setIsRefundEnabled((prev) => !prev);
+    setIsRefundEnabled((prev: boolean) => !prev);
   };
 
   const handlePartiallyRefundedToggle = () => {
-    setIsPartiallyRefundedEnabled((prev) => !prev);
+    setIsPartiallyRefundedEnabled((prev: boolean) => !prev);
   };
 
   const handleRangeSliderChange = useCallback(

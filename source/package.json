@@ -2,6 +2,7 @@
   "name": "return-monitor",
   "private": true,
   "scripts": {
+    "worker-start": "npx tsx workers/index.ts",
     "build": "remix vite:build",
     "dev": "shopify app dev",
     "config:link": "shopify app config link",

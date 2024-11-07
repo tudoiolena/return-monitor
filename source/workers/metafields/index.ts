@@ -18,7 +18,7 @@ type CustomerWithOrders = Customer & {
 
 const prisma = new PrismaClient();
 
-async function checkAndUpdateCustomerSuspicion() {
+export async function checkAndUpdateCustomerSuspicion() {
   const settings = await prisma.setting.findMany();
 
   for (const setting of settings) {
@@ -134,4 +134,4 @@ async function updateShopifyMetafield(
   }
 }
 
-checkAndUpdateCustomerSuspicion().catch(console.error);
+//checkAndUpdateCustomerSuspicion().catch(console.error);
