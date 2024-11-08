@@ -3,7 +3,7 @@
 client_id = "13419ce5335967303fb8b4b14de9b911"
 name = "return-monitor"
 handle = "return-monitor-1"
-application_url = "https://precious-texts-encountered-sharp.trycloudflare.com"
+application_url = "https://they-forms-feeds-waters.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "read_customers,read_orders,read_returns,write_customers"
 
 [auth]
 redirect_urls = [
-  "https://precious-texts-encountered-sharp.trycloudflare.com/auth/callback",
-  "https://precious-texts-encountered-sharp.trycloudflare.com/auth/shopify/callback",
-  "https://precious-texts-encountered-sharp.trycloudflare.com/api/auth/callback"
+  "https://they-forms-feeds-waters.trycloudflare.com/auth/callback",
+  "https://they-forms-feeds-waters.trycloudflare.com/auth/shopify/callback",
+  "https://they-forms-feeds-waters.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

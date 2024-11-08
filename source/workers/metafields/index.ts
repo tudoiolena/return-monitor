@@ -32,7 +32,6 @@ export async function checkAndUpdateCustomerSuspicion() {
     });
 
     const shop = await prisma.shop.findFirst({ where: { id: setting.shopId } });
-    console.log("shop", shop);
     const suspiciousCustomers: string[] = [];
 
     for (const customer of customers) {
@@ -40,7 +39,6 @@ export async function checkAndUpdateCustomerSuspicion() {
 
       if (isSuspicious) {
         const customerShopifyId = customer.shopifyId.split("/").pop();
-        console.log("customer.shopifyId", customerShopifyId);
         if (customerShopifyId) {
           suspiciousCustomers.push(customerShopifyId);
         }

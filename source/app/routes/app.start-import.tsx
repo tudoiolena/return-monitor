@@ -36,8 +36,8 @@ export default function BulkOrderExport() {
 
   const isLoading =
     taskData?.task &&
-    (taskData.task.stage !== $Enums.SyncOrdersTaskStage.FINISH ||
-      taskData.task.error);
+    taskData.task.stage !== $Enums.SyncOrdersTaskStage.FINISH &&
+    !taskData.task.error;
 
   useEffect(() => {
     const fetchTaskData = async () => {
@@ -84,15 +84,21 @@ export default function BulkOrderExport() {
                     tone={currentProgress === 100 ? "success" : "primary"}
                     size="small"
                   />
-                  {currentProgress === 100 ? (
+                  {currentProgress === 100 && (
                     <Banner tone="success" title="Success">
                       <Text as="p">The import is finished successfully</Text>
                     </Banner>
-                  ) : (
-                    <Banner title="Wait the operation to be finished">
+                  )}
+                  {currentProgress !== 100 && !taskData.task.error && (
+                    <Banner title="Wait until the operation is finished">
                       <Text as="p">
-                        Wait until the order importing will be finished
+                        Wait until the order importing is finished
                       </Text>
+                    </Banner>
+                  )}
+                  {taskData.task.error && (
+                    <Banner tone="critical">
+                      <Text as="p">Error: ${taskData.task.error}</Text>
                     </Banner>
                   )}
                 </BlockStack>
