@@ -11,6 +11,13 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   // If this webhook already ran, the session may have been deleted previously.
   if (session) {
     await db.session.deleteMany({ where: { shop } });
+
+    const shopRecord = await prisma.shop.findUnique({
+      where: { domain: shop },
+    });
+    if (shopRecord) {
+      await prisma.shop.delete({ where: { id: shopRecord.id } });
+    }
   }
 
   return new Response();

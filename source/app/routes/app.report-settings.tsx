@@ -42,12 +42,15 @@ export default function ReportSettings() {
   const [isPartiallyRefundedEnabled, setIsPartiallyRefundedEnabled] = useState(
     settings.isPartiallyRefundedStatus,
   );
-  const [rangeValue, setRangeValue] = useState(DEFAULT_RANGE_VALUE);
+  const [rangeValue, setRangeValue] = useState(
+    settings.partialRefundPercentage || DEFAULT_RANGE_VALUE,
+  );
   const [suspiciousRangeValue, setsuspiciousRangeValue] = useState(
-    DEFAULT_SUSPICIOUS_RANGE_VALUE,
+    settings.suspiciousReturnPercentage || DEFAULT_SUSPICIOUS_RANGE_VALUE,
   );
   const [returnValue, setReturnValue] = useState(
-    `${DEFAULT_SUSPICIOUS_RETURN_VALUE}`,
+    `${settings.suspiciousReturnAmount}` ||
+      `${DEFAULT_SUSPICIOUS_RETURN_VALUE}`,
   );
 
   const handleReturnToggle = () => {

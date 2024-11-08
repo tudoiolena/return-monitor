@@ -1,27 +1,21 @@
 import type { LoaderFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { authenticate } from "app/shopify.server";
+import { getAdminContext } from "app/shopify.server";
 
 export const settingsLoader: LoaderFunction = async ({
   request,
 }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
-  const shop = session.shop;
-
+  const adminContext = await getAdminContext(request);
+  const shopDomain = adminContext.session.shop;
   const shopRecord = await prisma.shop.findUnique({
-    where: { domain: shop },
+    where: { domain: shopDomain },
   });
 
   if (!shopRecord) {
-    throw new Error(`Shop not found for domain: ${shop}`);
+    throw new Error(`Shop not found for domain: ${shopRecord}`);
   }
 
   const settings = await prisma.setting.findUnique({
     where: { shopId: shopRecord.id },
-    select: {
-      isReturnStatus: true,
-      isRefundStatus: true,
-      isPartiallyRefundedStatus: true,
-    },
   });
 
   if (!settings) {

@@ -55,7 +55,7 @@ model SyncOrdersTask {
   error          String?
   createdAt      DateTime            @default(now())
   updatedAt      DateTime            @updatedAt
-  shop           Shop                @relation(fields: [shopId], references: [id])
+  shop           Shop                @relation(fields: [shopId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([shopId], name: "SyncOrdersTaskShopIdIndex")
   @@index([stage], name: "SyncOrdersTaskStageIndex")
@@ -75,7 +75,7 @@ model Order {
   refunds          Refund[]
   returns          Return[]
   shopId           Int
-  shop             Shop     @relation(fields: [shopId], references: [id])
+  shop             Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([shopifyId], name: "OrderShopIdIndex")
 }
@@ -88,7 +88,7 @@ model Customer {
   email            String?
   orders           Order[]
   shopId           Int
-  shop             Shop     @relation(fields: [shopId], references: [id])
+  shop             Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([shopifyId], name: "CustomerShopIdIndex")
   @@index([email], name: "CustomerEmailIndex")
@@ -102,7 +102,7 @@ model Refund {
   totalRefunded    Decimal  @db.Decimal(10, 2)
   refundCurrency   String
   shopId           Int
-  shop             Shop     @relation(fields: [shopId], references: [id])
+  shop             Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([shopifyId], name: "RefundShopIdIndex")
 }
@@ -113,7 +113,7 @@ model Return {
   orderId          Int
   order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   shopId           Int
-  shop             Shop     @relation(fields: [shopId], references: [id])
+  shop             Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([shopifyId], name: "ReturnShopIdIndex")
 }
@@ -125,9 +125,9 @@ model Setting {
   isRefundStatus                   Boolean   @default(true)
   isPartiallyRefundedStatus        Boolean   @default(true)
   partialRefundPercentage          Int       @default(30)
-  shop                             Shop      @relation(fields: [shopId], references: [id])
   suspiciousReturnPercentage       Int       @default(30)
   suspiciousReturnAmount           Int       @default(2)
+  shop                             Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([shopId], name: "SettingShopIdIndex")
   @@index([isReturnStatus], name: "SettingisReturnStatus")

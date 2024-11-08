@@ -32,7 +32,7 @@ export async function checkAndUpdateCustomerSuspicion() {
     });
 
     const shop = await prisma.shop.findFirst({ where: { id: setting.shopId } });
-
+    console.log("shop", shop);
     const suspiciousCustomers: string[] = [];
 
     for (const customer of customers) {
@@ -134,4 +134,4 @@ async function updateShopifyMetafield(
   }
 }
 
-//checkAndUpdateCustomerSuspicion().catch(console.error);
+checkAndUpdateCustomerSuspicion().catch(console.error);
