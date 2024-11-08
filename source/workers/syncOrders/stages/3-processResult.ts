@@ -52,17 +52,17 @@ export const processResult = async (task: SyncOrdersTask) => {
       const customerData = data.customer;
       const customer = await prisma.customer.upsert({
         where: { shopifyId: customerData.id },
-        update: {
-          firstName: customerData.firstName ?? "Unknown",
-          lastName: customerData.lastName,
-          email: customerData.email,
-        },
         create: {
-          shopId: shop.id,
+          shop: { connect: { id: shop.id } },
           shopifyId: customerData.id,
           firstName: customerData.firstName ?? "Unknown",
-          lastName: customerData.lastName,
-          email: customerData.email,
+          lastName: customerData.lastName ?? "Unknown",
+          email: customerData.email || "",
+        },
+        update: {
+          firstName: customerData.firstName ?? "Unknown",
+          lastName: customerData.lastName ?? "Unknown",
+          email: customerData.email || "",
         },
       });
 

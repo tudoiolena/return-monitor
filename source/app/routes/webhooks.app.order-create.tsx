@@ -19,6 +19,8 @@ const processOrder = async (shop: string, payload: any) => {
     where: { domain: shop },
   });
 
+  console.log("shopRecord", shopRecord);
+
   if (!shopRecord) {
     throw new Error(`Shop not found for domain: ${shop}`);
   }
@@ -27,12 +29,16 @@ const processOrder = async (shop: string, payload: any) => {
     where: { shopifyId: `gid://shopify/Customer/${customerData.id}` },
     create: {
       shopifyId: `gid://shopify/Customer/${customerData.id}`,
-      firstName: customerData.first_name,
-      lastName: customerData.last_name,
-      email: customerData.email,
-      shopId: shopRecord.id,
+      firstName: customerData.firstName ?? "Unknown",
+      lastName: customerData.lastName ?? "Unknown",
+      email: customerData.email || "",
+      shop: { connect: { id: shopRecord.id } },
     },
-    update: {},
+    update: {
+      firstName: customerData.firstName ?? "Unknown",
+      lastName: customerData.lastName ?? "Unknown",
+      email: customerData.email || "",
+    },
   });
 
   const existingOrder = await prisma.order.findFirst({

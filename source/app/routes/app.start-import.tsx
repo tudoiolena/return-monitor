@@ -30,7 +30,6 @@ export { action } from "app/actions/start-import.action";
 export default function BulkOrderExport() {
   const { task } = useLoaderData<typeof loader>();
   const [taskData, setTaskData] = useState(task);
-  console.log("taskData", taskData);
   const currentProgress = taskData?.task?.stage
     ? progressMapping[taskData.task.stage as $Enums.SyncOrdersTaskStage]
     : 0;
@@ -119,6 +118,12 @@ export default function BulkOrderExport() {
               <TextField
                 label="Created At:"
                 value={taskData?.task?.createdAt}
+                disabled
+                autoComplete="off"
+              />
+              <TextField
+                label="Error:"
+                value={taskData?.task?.error}
                 disabled
                 autoComplete="off"
               />

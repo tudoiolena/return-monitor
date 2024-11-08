@@ -83,9 +83,9 @@ model Order {
 model Customer {
   id               Int       @id @default(autoincrement())
   shopifyId        String    @unique
-  firstName        String
-  lastName         String
-  email            String
+  firstName        String?
+  lastName         String?
+  email            String?
   orders           Order[]
   shopId           Int
   shop             Shop     @relation(fields: [shopId], references: [id])
@@ -121,13 +121,13 @@ model Return {
 model Setting {
   id                               Int       @id @default(autoincrement())
   shopId                           Int       @unique
-  isReturnStatus                   Boolean
-  isRefundStatus                   Boolean
-  isPartiallyRefundedStatus        Boolean
-  partialRefundPercentage          Int
-  shop                             Shop     @relation(fields: [shopId], references: [id])
-  suspiciousReturnPercentage       Int
-  suspiciousReturnAmount           Int
+  isReturnStatus                   Boolean   @default(true)
+  isRefundStatus                   Boolean   @default(true)
+  isPartiallyRefundedStatus        Boolean   @default(true)
+  partialRefundPercentage          Int       @default(30)
+  shop                             Shop      @relation(fields: [shopId], references: [id])
+  suspiciousReturnPercentage       Int       @default(30)
+  suspiciousReturnAmount           Int       @default(2)
 
   @@index([shopId], name: "SettingShopIdIndex")
   @@index([isReturnStatus], name: "SettingisReturnStatus")

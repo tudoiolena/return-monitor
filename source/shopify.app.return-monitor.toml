@@ -3,12 +3,12 @@
 client_id = "13419ce5335967303fb8b4b14de9b911"
 name = "return-monitor"
 handle = "return-monitor-1"
-application_url = "https://precious-texts-encountered-sharp.trycloudflare.com"
+application_url = "https://movements-window-defined-enters.trycloudflare.com"
 embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
-dev_store_url = "app-tutorial-test.myshopify.com"
+dev_store_url = "health-project-app.myshopify.com"
 include_config_on_deploy = true
 
 [access_scopes]
@@ -17,9 +17,9 @@ scopes = "read_customers,read_orders,read_returns,write_customers"
 
 [auth]
 redirect_urls = [
-  "https://precious-texts-encountered-sharp.trycloudflare.com/auth/callback",
-  "https://precious-texts-encountered-sharp.trycloudflare.com/auth/shopify/callback",
-  "https://precious-texts-encountered-sharp.trycloudflare.com/api/auth/callback"
+  "https://movements-window-defined-enters.trycloudflare.com/auth/callback",
+  "https://movements-window-defined-enters.trycloudflare.com/auth/shopify/callback",
+  "https://movements-window-defined-enters.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

@@ -140,6 +140,11 @@ export default function ReportSettings() {
                       </p>
                     }
                   />
+                  <input
+                    type="hidden"
+                    name="partialRefundPercentage"
+                    value={rangeValue}
+                  />
                 </>
               )}
             </BlockStack>
@@ -168,6 +173,11 @@ export default function ReportSettings() {
                     {suspiciousRangeValue}
                   </p>
                 }
+              />
+              <input
+                type="hidden"
+                name="suspiciousReturnPercentage"
+                value={suspiciousRangeValue}
               />
               <TextField
                 name="suspiciousReturnAmount"

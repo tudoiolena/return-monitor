@@ -15,15 +15,23 @@ export const returnDataLoader: LoaderFunction = async ({
     throw new Error(`Shop not found for domain: ${shop}`);
   }
 
-  const settings = await prisma.setting.findUnique({
+  let settings = await prisma.setting.findUnique({
     where: { shopId: shopRecord.id },
   });
 
   if (!settings) {
-    throw new Error("Settings not found for the shop");
+    settings = await prisma.setting.create({
+      data: {
+        shopId: shopRecord.id,
+        suspiciousReturnPercentage: 0,
+      },
+    });
   }
 
   const data = await prisma.customer.findMany({
+    where: {
+      shopId: shopRecord.id,
+    },
     select: {
       firstName: true,
       lastName: true,

@@ -25,18 +25,19 @@ export const action = async ({ request }: { request: Request }) => {
   const isRefundStatus = formData.get("isRefundEnabled") === "true";
   const isPartiallyRefundedStatus =
     formData.get("isPartiallyRefundedEnabled") === "true";
-  const partialRefundPercentage =
-    parseInt(formData.get(":rb:") as string, 10) || DEFAULT_RANGE_VALUE;
-  const suspiciousReturnPercentage =
-    parseInt(formData.get(":rd:") as string, 10) ||
-    DEFAULT_SUSPICIOUS_RANGE_VALUE;
   const suspiciousReturnAmount =
     Number(formData.get("suspiciousReturnAmount")) ||
     DEFAULT_SUSPICIOUS_RETURN_VALUE;
+  const partialRefundPercentage =
+    Number(formData.get("partialRefundPercentage")) || DEFAULT_RANGE_VALUE;
+  const suspiciousReturnPercentage =
+    Number(formData.get("suspiciousReturnPercentage")) ||
+    DEFAULT_SUSPICIOUS_RANGE_VALUE;
 
   await prisma.setting.upsert({
     where: { shopId: shopRecord.id },
-    update: {
+    create: {
+      shopId: shopRecord.id,
       isReturnStatus,
       isRefundStatus,
       isPartiallyRefundedStatus,
@@ -44,8 +45,7 @@ export const action = async ({ request }: { request: Request }) => {
       suspiciousReturnPercentage,
       suspiciousReturnAmount,
     },
-    create: {
-      shopId: shopRecord.id,
+    update: {
       isReturnStatus,
       isRefundStatus,
       isPartiallyRefundedStatus,
