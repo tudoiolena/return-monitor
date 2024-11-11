@@ -5,18 +5,19 @@ import {
   DEFAULT_SUSPICIOUS_RANGE_VALUE,
   DEFAULT_SUSPICIOUS_RETURN_VALUE,
 } from "app/routes/app.report-settings";
-import { authenticate } from "app/shopify.server";
+import { getAdminContext } from "app/shopify.server";
 
 export const action = async ({ request }: { request: Request }) => {
-  const { session } = await authenticate.admin(request);
-  const shop = session.shop;
+  const adminContext = await getAdminContext(request);
+
+  const shopDomain = adminContext.session.shop;
 
   const shopRecord = await prisma.shop.findUnique({
-    where: { domain: shop },
+    where: { domain: shopDomain },
   });
 
   if (!shopRecord) {
-    throw new Error(`Shop not found for domain: ${shop}`);
+    throw new Error(`Shop not found for domain: ${shopRecord}`);
   }
 
   const formData = await request.formData();
@@ -33,6 +34,14 @@ export const action = async ({ request }: { request: Request }) => {
   const suspiciousReturnPercentage =
     Number(formData.get("suspiciousReturnPercentage")) ||
     DEFAULT_SUSPICIOUS_RANGE_VALUE;
+
+  const currentSetting = await prisma.setting.findUnique({
+    where: { shopId: shopRecord.id },
+  });
+
+  const shouldUpdateSuspicionCheck =
+    currentSetting?.suspiciousReturnPercentage !== suspiciousReturnPercentage ||
+    currentSetting?.suspiciousReturnAmount !== suspiciousReturnAmount;
 
   await prisma.setting.upsert({
     where: { shopId: shopRecord.id },
@@ -54,6 +63,14 @@ export const action = async ({ request }: { request: Request }) => {
       suspiciousReturnAmount,
     },
   });
+
+  if (shouldUpdateSuspicionCheck) {
+    await prisma.flag.upsert({
+      where: { shopId: shopRecord.id },
+      create: { shopId: shopRecord.id, shouldSuspiciousBeUpdated: true },
+      update: { shouldSuspiciousBeUpdated: true },
+    });
+  }
 
   return redirect(AdminNavigation.report);
 };

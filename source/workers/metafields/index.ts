@@ -22,6 +22,14 @@ export async function checkAndUpdateCustomerSuspicion() {
   const settings = await prisma.setting.findMany();
 
   for (const setting of settings) {
+    const flag = await prisma.flag.findUnique({
+      where: { shopId: setting.shopId },
+    });
+
+    if (!flag?.shouldSuspiciousBeUpdated) {
+      continue;
+    }
+
     const customers = await prisma.customer.findMany({
       where: { shopId: setting.shopId },
       include: {
@@ -48,6 +56,11 @@ export async function checkAndUpdateCustomerSuspicion() {
     if (suspiciousCustomers.length > 0) {
       await updateShopifyMetafield(suspiciousCustomers, shop!);
     }
+
+    await prisma.flag.update({
+      where: { shopId: setting.shopId },
+      data: { shouldSuspiciousBeUpdated: false },
+    });
   }
 }
 
@@ -132,4 +145,4 @@ async function updateShopifyMetafield(
   }
 }
 
-checkAndUpdateCustomerSuspicion().catch(console.error);
+// checkAndUpdateCustomerSuspicion().catch(console.error);

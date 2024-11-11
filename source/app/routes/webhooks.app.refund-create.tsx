@@ -78,6 +78,12 @@ const processRefund = async (shop: string, payload: any) => {
       },
     });
   }
+
+  await prisma.flag.upsert({
+    where: { shopId: shopRecord.id },
+    create: { shopId: shopRecord.id, shouldSuspiciousBeUpdated: true },
+    update: { shouldSuspiciousBeUpdated: true },
+  });
 };
 
 const getOrderStatuses = async (shop: string, orderId: string) => {

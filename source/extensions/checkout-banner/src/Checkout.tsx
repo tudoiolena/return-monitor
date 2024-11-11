@@ -5,6 +5,7 @@ import {
   // useApi,
   useCustomer,
   useAppMetafields,
+  useExtensionEditor,
 } from "@shopify/ui-extensions-react/checkout";
 
 type Status = "info" | "warning" | "critical" | "success";
@@ -19,14 +20,14 @@ function Extension() {
   // const { query, sessionToken, shop } = useApi();
 
   const customer = useCustomer();
-  const customerId = customer.id.split("/").pop();
+  const customerId = customer?.id?.split("/").pop();
 
   const metafieldValue = useAppMetafields({
     namespace: "return_monitor",
     key: "suspiciousCustomers",
   });
 
-  console.log("suspiciousCustomers", metafieldValue);
+  // console.log("suspiciousCustomers", metafieldValue);
 
   const isSuspicious = metafieldValue[0]?.metafield.value
     ? JSON.parse(metafieldValue[0]?.metafield.value as string).includes(
@@ -52,6 +53,19 @@ function Extension() {
   const title = merchantTitle ?? "Custom Banner";
   const description = merchantDescription ?? "Some description";
 
+  const chekoutEditor = useExtensionEditor();
+
+  if (chekoutEditor?.type === "checkout") {
+    return (
+      <Banner
+        title={String(title)}
+        status={status}
+        collapsible={Boolean(collapsible)}
+      >
+        {description}
+      </Banner>
+    );
+  }
   return (
     <>
       {isSuspicious && (

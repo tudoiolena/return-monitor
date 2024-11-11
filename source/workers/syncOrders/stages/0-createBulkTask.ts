@@ -11,7 +11,7 @@ export const createBulkTask = async (task: SyncOrdersTask) => {
 
     const query = `
     {
-      orders(first: 250) {
+      orders {
         edges {
           node {
             id
@@ -38,7 +38,7 @@ export const createBulkTask = async (task: SyncOrdersTask) => {
                 }
               }
             }
-            returns(first: 250) {
+            returns {
               edges {
                 node {
                   id
